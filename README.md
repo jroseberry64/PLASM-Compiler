@@ -47,13 +47,13 @@ existing assembly code
 Currently it only targets the `6502`, but the long term goal is to extend multiple other retro CPUs.
 A list of current and planned targets includes:
 
-&ensp;:white_check_mark: `6502` <br/>
-&ensp;:black_square: `65C02` <br/>
-&ensp;:black_square: `65816` <br/>
-&ensp;:black_square: `8080` <br/>
-&ensp;:black_square: `Z80` <br/>
-&ensp;:black_square: `Game Boy Z80` <br/>
-&ensp;:black_square: Other retro 8/16/32 bit CPUs <br/>
+&ensp; :white_check_mark: `6502` <br/>
+&ensp; :black_square: `65C02` <br/>
+&ensp; :black_square: `65816` <br/>
+&ensp; :black_square: `8080` <br/>
+&ensp; :black_square: `Z80` <br/>
+&ensp; :black_square: `Game Boy Z80` <br/>
+&ensp; :black_square: Other retro 8/16/32 bit CPUs <br/>
 
 ## Why The Name ***PLASM***?
 
