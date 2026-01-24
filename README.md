@@ -47,7 +47,7 @@ existing assembly code
 Currently it only targets the `6502`, but the long term goal is to extend multiple other retro CPUs.
 A list of current and planned targets includes:
 
-&ensp; :white_check_mark: `6502` <br/>
+- [x] `6502` <br/>
 - [ ] `65C02` <br/>
 - [ ] `65816` <br/>
 - [ ] `8080` <br/>
