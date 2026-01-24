@@ -25,17 +25,27 @@ I'll address one more thing before moving on to the nuts and bolts of the langua
 
 Right now the compiler executable achieves all the basic goals I started out with but is a few features short of being a full Beta version of the compiler. At a high level what still needs to be added is:
 
-* More types. The initial design choice was to limit data types to strings and native 8-bit size variables. But, after deciding it would be convenient to add pointers to the language I realized that it's not as hard to optimize 16-bit arithmetic/comparisons due to the expression evaluation limitations I decided to enforce, I just haven't finished fully implementing data type declarations and all the code generation that handles multi-byte operations.
+* More data types. The initial design choice was to limit data types to strings and native 8-bit size variables. But, after deciding it would be convenient to add pointers to the language I realized that it's not as hard to optimize 16-bit arithmetic/comparisons due to the expression evaluation limitations I decided to enforce, I just haven't finished fully implementing data type declarations and all the code generation that handles multi-byte operations.
 
 * Better configuration options. I overlooked some configuration possibilities when it comes to dealing with what character set the target machine uses (ASCII vs PETSCII mostly) and in order to not break things I (temporarily) removed native string/char support pending command line options/inline compiler directives to deal with this. You are still capable of declaring strings in an assembly file and there's a mechanism to tell the compiler that's what you're doing, but this workaround is only temporary. The Beta version will also include a feature that allows you to tell the compiler you're using this file as a "main" file so it can add more boilerplate to the .asm file, but for now the default behavior is to assume the user will provide their own assembly file to act as the "main" program file.
 
-* A few other keywords/features to the language and backend optimization passes to the IR to fix things like condensing redundant labels or folding a series of JMP instructions into 1 JMP, telling the compiler it's allowed to perform a tail call, and a few other unnecessary instructions it occasionally generates because the front end can only make so many assumptions. I really wanted to wait to tackle this until I am satisfied that I've added all the language features and there's nothing more I can do in the front end to optimize the IR it outputs.
+* A few other keywords/features to the language and backend optimization passes to the IR to fix things like condensing redundant labels or folding a series of JMP instructions into 1 JMP, telling the compiler it's allowed to perform a tail call, and a few other unnecessary instructions it occasionally generates because the front end can only make so many assumptions. I really wanted to wait to tackle this until I am satisfied that I've added all the language features and there's nothing more I can do in the front end to optimize the IR it outputs. Also, there are a few situations where the compiler doesn't correctly swap a branch instruction for a jump that needs to fixed. 
 
 * A dash of syntactic sugar to make writing some expressions shorter
 
 * Support for more assembler back ends. Currently, only CA65/CL65 assembly format is supported.
 
 * Uploading the source code. I'd prefer to do some more refactoring/cleanup before sharing the C source.
+
+## Installation
+The PLASM compiler doesn't have any dependencies besides having the desired assembler backend installed. 
+
+### Windows
+There's not much to do other than unzipping the executable.
+
+### MacOS/Linux
+MacOS might require you to go to the settings to allow the executable to run.
+Linux might require `chmod` to change the file permissions.
 
 ## Usage
 Right now the compiler operates under the assumption that the executable is in the same directory as the code it's compiling (as I don't think anyone wants to install the alpha version that's going to have more features added). All OS versions utilize the command line to invoke the compiler.
@@ -63,6 +73,7 @@ Note that any of the following sections marked with \* are subject to updates as
 const
 var
 data
+call
 procedure
 begin
 end
@@ -113,7 +124,6 @@ Local Data Declaration Block+
 Procedure Code Block
 
 Main Procedure Code Block*
-
 ```
 Note that anything with '+' is optional and '\*' is only required if you don't use the `%unit` compiler directive at the beginning of the program.
 
@@ -201,3 +211,209 @@ extern data myData, myArray[], array[] in ROM, otherArray[] in ROM;
 ```
 
 ### Procedure Declaration
+Procedures are declared with the following syntax:
+
+```
+{ Procedure declaration }
+procedure SomeProcedure;
+
+{ Local constant declaration }
+const localConst = 1;
+
+{ Local variable declaration } 
+var localPtr[];
+
+{ Local data declaration }
+data localArray[4];
+
+{ CODE BLOCK BEGINS HERE }
+```
+
+One thing to note is while PLASM doesn't have any explicit syntax for declaring/passing arguments to procedures there's nothing stopping you from using local/global variables and/or registers to pass arguments to the procedure or return as many values as you want.
+
+### Register/Flag Access
+PLASM allows access to registers/flags as psuedo-variables inside statements or expressions.
+
+#### 6502 Registers/Flags
+* Accumulator (A) Register: `%A`
+* X Index (X) Register: `%X`
+* Y Index (Y) Register: `%Y`
+* Negative (N) Flag: `%NF`
+* Overflow (V) Flag: `%VF`
+* Zero (Z) Flag: `%ZF`
+* Carry (C) Flag: `%CF`
+
+NOTE: At this point the compilers only recognizes 6502 registers, but as more processors are added to the back end the compiler will recognize registers based on the target CPU.
+
+### `mem` Keyword
+PLASM provides a similar concept to BASIC's `PEEK`/`POKE` with the `mem[]` keyword. 
+
+`mem[]` acts as a psuedo variable that allows you to treat memory like a giant array so you can load/store variables/data from anywhere in memory.
+
+### Statements
+
+#### `;` In PLASM VS C
+In C, `;` is considered a statement _terminator_. In PLASM, `;` is a statement _seperator_ which means it's just used to tell where one statement ends and another begins.
+
+####`begin`...`end` Statement Blocks
+Unlike other C-like languages, PLASM doesn't utilize `{...}` to organize blocks of code. Instead, the keywords `begin...end` are used.
+
+#### Assignment Statements
+The `:=` symbol acts as the assignment operator for PLASM. 
+
+Examples of valid assignment statements:
+
+```
+{ Variable assignment }
+
+v1 := 1;         { Assign a constant value }
+v1 := HexConst;
+v1 := NumConst;
+v1 := v2;        { Assign the value of one variable to another }
+v1 := mem[$10];  { Assign the value of a memory location }
+v1 := p1[];      { Assign dereferenced pointer value }
+v1 := p1[%Y];    { Offsets p1 by the contents of the Y register and assigns value of dereferenced pointer }
+v1 := a1[0];     { Assigns the value of the first element in array }
+   
+{ Pointer assignment (Same as variable with these additions) }
+p1[] := v1;      { Assigns variable to dereferenced pointer }
+p1 := @v1;       { Assign address of variable to pointer }
+p1 := AddrConst; { Same as above but with constant }
+
+{ Array assignment (Same as variable with these additions) }
+a1[] := v1;      { First element of array assigned variable value }
+a1[%X] := v1;    { Array element index by %X assigned variable value }
+
+{ Memory assignment (same as variable, with two variations) }
+mem[AddrConst] := 1;  { Uses cont as address }
+mem[$1000] := v1;     { Uses hard coded value as address }
+
+{ Register Assignment }
+%A := 1;
+%A := v1;
+%A := p1[];
+%A := %X;
+%A := %Y;
+
+%X := 1;
+%X := p1[%Y];
+%X := %A;
+```
+
+#### Assigning Results Of Arithmetic/Bitwise Logic Operations
+
+PLASM only supports the native bitwise/mathematical operations of the CPU, so for the 6502 this means only addition, subraction, Logical AND/OR/EOR, shift/rotate left/right, and increment/decrement expressions are supported. 
+
+Also note that addition, subtraction, and logical AND/OR/EOR can only be performed as binary operations, meaning:
+
+```
+{ These are expressions allowed }
+v1 := v2 + v3;        
+%A := v1 - v2;         { +=, -= will be added to Beta version }
+%X := v1 & 1;          { Bitwise Logical AND }
+v1 := p1[%Y] | p2[%Y]; { Bitwise Logical OR }
+%Y := v1 ^ v2;         { Bitwise Logical EOR }
+
+{ These are not }
+v1 := v2 + v3 + v4;
+v1 := v2 & v3 + v4;
+```
+
+While shift/rotate left/right and increment/decrement are unary operations, meaning:
+
+```
+{ This is how to use the unary operators }
+inc v1;
+dec v1;
+shl v1;
+shr v1;
+rol v1;
+ror v1;
+
+{ This is also valid }
+shl %A;
+shr %A;
+rol %A;
+ror %A;
+
+{ Note that on the vanilla 6502 there's no 'inc A' instruction }
+inc %X;
+dec %X;
+inc %Y;
+dec %Y;
+```
+
+#### Procedure Calls
+```
+{ Allowed }
+
+call SomeProcedure;
+
+{ Not Allowed }
+
+v1 := SomeProcedure;
+```
+
+Remember, any input/output to procedures must be handled manually, so it's not possible to assign the result of a procedure call to a variable. 
+
+#### Comparison/Conditional Operators
+PLASM supports the following operators:
+
+```
+v1 = v2  { Tests equality }
+v1 # v2  { Tests inequality }
+v1 < v2  { <=, >= will be added to Beta }
+v1 > v2
+
+%CF-     { Carry Flag Clear }
+%CF+     { Carry Flag Set }
+%VF-
+%VF+
+%ZF-
+%ZF+
+%NF-
+%NF+
+```
+It should be noted that only one comparison or condition operator may be used per conditional statement (i.e. there's currently no support for Boolean AND/OR/NOT to combine conditional statments)
+
+#### `if`...`then`...`else` Statements
+These statements work the same as they do in other languages (minus the single conditional constraint).
+
+```
+if v1 = v2 then
+begin
+  { Do something }
+end
+else if %CF+ then
+  { Do something in one line }
+else
+begin
+  { Do something else }
+end;
+```
+
+#### `repeat`...`until` Statements
+Works the same as a `do`...`while` loop in C or any other C-like language.
+
+```
+%Y := 0;
+
+repeat
+ inc %Y
+until %Y = 20;
+```
+
+#### `while`...`do` Statements
+Also works the same as `while` loops in other C-like languages.
+
+```
+%X := 0;
+while %X < 5 do
+begin
+  a1[%X] := 0;
+  inc %X
+end;
+```
+
+#### `asm {`...`} end` Statements (AKA Inline Assembly)
+PLASM makes no attempt to do anything with assembly inlined between `asm {...} end` blocks but copy and paste it to the final assembly output. So, in that sense, this is another place where PLASM punts any validation to the target assembler. On the one hand, this frees you to do anything the language doesn't support, including accessing const/var/data from outside the block (as PLASM doesn't do anything to mangle names so you can use then 1-1). On the other hand, any assembly syntax errors won't get caught until invoking the assembler.
