@@ -1,35 +1,125 @@
-# PLASM High Level Overview
-PLASM is lightweight programming language for retro computing platforms that's designed around being able to integrate seamlessly with existing assembly code. Currently it only targets the 6502 but the long term goal is to not just extend it to the 65C02 and 65816 but also to the 8080, Z80, Gameboy Z80, as well as other retro 8/16/32 bit CPUs.
+# PLASM
 
-## Why The Name PLASM?
-PLASM stands for **PL/0** + **Assembly**
+A lightweight programming language for retro computing platforms designed to integrate seamlessly with
+existing assembly code
 
-* **PL/0**: the basis of the language's syntax is PL/0 (Pascal's less capable cousin) with some additional syntax borrowed from Super Pascal for the Commodore 64 and a little bit from C.
-* **Assembly**: one of the major design goals was to make it seamless to integrate PLASM code with pre-existing assembly code.
+## Table Of Contents
+
+* [Compatible Targets](#compatible-targets)
+* [Why The Name ***PLASM***?](#why-the-name-plasm)
+* [Design Philosophy](#design-philosophy)
+* [State Of The Compiler](#state-of-the-compiler)
+* [Installation](#installation)
+   * [Windows](#windows)
+   * [MacOS/Linux](#macoslinux)
+* [Usage](#usage)
+   * [Windows](#windows-1)
+   * [Linux/MacOS](#linuxmacos)
+* [***PLASM*** Language](#plasm-language)
+   * [Reserved Keywords*](#reserved-keywords)
+   * [Other Symbols*](#other-symbols)
+   * [Compiler Directives*](#compiler-directives)
+   * [***PLASM*** Program Structure](#plasm-program-structure)
+      * [Comments](#comments)
+      * [Declaring Constants](#declaring-constants)
+      * [A Quick Note About Var/Data Distinction For 6502 Family Only](#a-quick-note-about-vardata-distinction-for-6502-family-only)
+      * [Declaring Variables](#declaring-variables)
+      * [Declaring Data](#declaring-data)
+      * [Procedure Declaration](#procedure-declaration)
+      * [A Quick Note About The "Main" Procedure](#a-quick-note-about-the-main-procedure)
+      * [Register/Flag Access](#registerflag-access)
+         * [6502 Registers/Flags](#6502-registersflags)
+      * [`mem` Keyword](#mem-keyword)
+      * [Statements](#statements)
+         * [`;` In ***PLASM*** VS C](#-in-plasm-vs-c)
+         * [`begin`...`end` Statement Blocks](#begin-end-statement-blocks)
+         * [Assignment Statements](#assignment-statements)
+         * [Assigning Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
+         * [Procedure Calls](#procedure-calls)
+         * [Comparison/Conditional Operators](#comparisonconditional-operators)
+         * [`if`...`then`...`else` Statements](#if-then-then-else-statements)
+         * [`repeat`...`until` Statements](#repeatuntil-statements)
+         * [`while`...`do` Statements](#whiledo-statements)
+         * [`asm {`...`} end` Statements (AKA Inline Assembly)](#asm-end-statements-aka-inline-assembly)
+
+## Compatible Targets
+
+Currently it only targets the `6502`, but the long term goal is to extend multiple other retro CPUs.
+A list of current and planned targets includes:
+
+- :white_check_mark: `6502`
+- [ ] `65C02`
+- [ ] `65816`
+- [ ] `8080`
+- [ ] `Z80`
+- [ ] `Game Boy Z80`
+- [ ] Other retro 8/16/32 bit CPUs
+
+## Why The Name ***PLASM***?
+
+***PLASM*** stands for **PL/0** + **Assembly**
+
+* **PL/0**: The basis of the language's syntax is `PL/0` (Pascal's less capable cousin) with some additional
+  syntax borrowed from `Super Pascal` for the `Commodore 64` and a little bit from `C`
+
+* **Assembly**: Being able to seamlessly integrate ***PLASM*** code with pre-existing assembly code is a core
+  feature of the language
 
 ## Design Philosophy
-With that being said, I want to emphasize that when I say PLASM is a lightweight language that's really shorthand for saying it's a programming language that behaves more like a really fancy assembler front end. 
 
-By that I mean the language has the bare minimum functionality necessary to be considered a "programming language." 
+The ***PLASM*** language has the bare minimum functionality necessary to be considered a "programming
+language." Branding ***PLASM*** as "*a lightweight programming language*" is shorthand for "*a programming
+language that behaves like a really fancy assembler front end.*"
 
-But, rather than try to add every flavor of syntactic sugar under the sun and bang my head against the wall trying to optimize the result, I heavily restricted some features of the language while also adding lower level features not typically found in a modern language in order to make it as easy as possible for the compiler to output effecient code. 
+Rather than try to add every flavor of syntactic sugar under the sun and bang my head against the wall
+trying to optimize the result, I **heavily restricted some features**
+**(***[See Statements](#Statements)***)** of the language in addition to exciting **lower level features** not
+typically found in a modern language providing **more control** in order to make it as easy as possible to
+output **efficient compiler generated code**.
 
-The idea is to provide just enough of a language that it's faster and less error prone than writing pure assembly code, but with the capability of freely inlining assembly anywhere to achieve anything the language doesn't provide out of the box. 
+The idea is to provide *just enough* of a language that it's **faster** and **less error prone** than writing
+pure assembly code, but with the capability of **freely inlining assembly anywhere** to achieve anything the
+language doesn't provide out of the box enabling more **developer autonomy**.
 
-In fact, it's very possible to use the language as a thin wrapper around assembly code just using the compiler to help with organizing variables/data/subroutines. 
+In fact, it's very possible to use ***PLASM*** as a thin wrapper around assembly code while only using the
+compiler to help with organizing variables/data/subroutines.
 
-Also, to make it easy integrating pre-written assembly code the compiler stops at generating assembly files formatted to target one of the popular assembler choices that already exists (CA65/KickAssembler for the 6502) for the target CPU. The compiler also only handles a single file at a time, though there are methods provided to access variables/routines outside the file.
+***PLASM*** also provides **easy integration of pre-written assembly code**. The compiler doesn't generate a
+binary executable, but rather generates the assembly language files formatted to target one of the existing
+popular assembler choices (i.e. `CA65/KickAssembler` for the `6502`) for the target CPU.
+
+The compiler is designed to **handle a single file at a time**. Though there *are* methods provided to access
+variables/routines outside the file.
 
 ## State Of The Compiler
+
 I'll address one more thing before moving on to the nuts and bolts of the language.
 
-Right now the compiler executable achieves all the basic goals I started out with but is a few features short of being a full Beta version of the compiler. At a high level what still needs to be added is:
+Right now the compiler executable achieves all the basic goals I started out with but is a few features short
+of being a full Beta version of the compiler. At a high level what still needs to be added is:
 
-* More data types. The initial design choice was to limit data types to strings and native 8-bit size variables. But, after deciding it would be convenient to add pointers to the language I realized that it's not as hard to optimize 16-bit arithmetic/comparisons due to the expression evaluation limitations I decided to enforce, I just haven't finished fully implementing data type declarations and all the code generation that handles multi-byte operations.
+* More data types. The initial design choice was to limit data types to strings and native 8-bit size
+  variables. But, after deciding it would be convenient to add pointers to the language I realized that it's
+  not as hard to optimize 16-bit arithmetic/comparisons due to the expression evaluation limitations I decided
+  to enforce, I just haven't finished fully implementing data type declarations and all the code generation
+  that handles multi-byte operations.
 
-* Better configuration options. I overlooked some configuration possibilities when it comes to dealing with what character set the target machine uses (ASCII vs PETSCII mostly) and in order to not break things I (temporarily) removed native string/char support pending command line options/inline compiler directives to deal with this. You are still capable of declaring strings in an assembly file and there's a mechanism to tell the compiler that's what you're doing, but this workaround is only temporary. The Beta version will also include a feature that allows you to tell the compiler you're using this file as a "main" file so it can add more boilerplate to the .asm file, but for now the default behavior is to assume the user will provide their own assembly file to act as the "main" program file.
+* Better configuration options. I overlooked some configuration possibilities when it comes to dealing with
+  what character set the target machine uses (ASCII vs PETSCII mostly) and in order to not break things I (
+  temporarily) removed native string/char support pending command line options/inline compiler directives to
+  deal with this. You are still capable of declaring strings in an assembly file and there's a mechanism to
+  tell the compiler that's what you're doing, but this workaround is only temporary. The Beta version will
+  also include a feature that allows you to tell the compiler you're using this file as a "main" file so it
+  can add more boilerplate to the .asm file, but for now the default behavior is to assume the user will
+  provide their own assembly file to act as the "main" program file.
 
-* A few other keywords/features to the language and backend optimization passes to the IR to fix things like condensing redundant labels or folding a series of JMP instructions into 1 JMP, telling the compiler it's allowed to perform a tail call, and a few other unnecessary instructions it occasionally generates because the front end can only make so many assumptions. I really wanted to wait to tackle this until I am satisfied that I've added all the language features and there's nothing more I can do in the front end to optimize the IR it outputs. Also, there are a few situations where the compiler doesn't correctly swap a branch instruction for a jump that needs to fixed. 
+* A few other keywords/features to the language and backend optimization passes to the IR to fix things like
+  condensing redundant labels or folding a series of JMP instructions into 1 JMP, telling the compiler it's
+  allowed to perform a tail call, and a few other unnecessary instructions it occasionally generates because
+  the front end can only make so many assumptions. I really wanted to wait to tackle this until I am satisfied
+  that I've added all the language features and there's nothing more I can do in the front end to optimize the
+  IR it outputs. Also, there are a few situations where the compiler doesn't correctly swap a branch
+  instruction for a jump that needs to fixed.
 
 * A dash of syntactic sugar to make writing some expressions shorter
 
@@ -39,20 +129,27 @@ Right now the compiler executable achieves all the basic goals I started out wit
 
 * Better compiler error messages
 
-* More library code. Right now I've only provided Commander X16 examples with a minimal amount of tested "library code" but more code/platform varieties is in progress. 
+* More library code. Right now I've only provided Commander X16 examples with a minimal amount of tested "
+  library code" but more code/platform varieties is in progress.
 
 ## Installation
-The PLASM compiler doesn't have any dependencies besides having the desired assembler backend installed. 
+
+The ***PLASM*** compiler doesn't have any dependencies besides having the desired assembler backend installed.
 
 ### Windows
+
 There's not much to do other than unzipping the executable.
 
 ### MacOS/Linux
+
 MacOS might require you to go to the settings to allow the executable to run.
 Linux might require `chmod` to change the file permissions.
 
 ## Usage
-Right now the compiler operates under the assumption that the executable is in the same directory as the code it's compiling (as I don't think anyone wants to install the alpha version that's going to have more features added). All OS versions utilize the command line to invoke the compiler.
+
+Right now the compiler operates under the assumption that the executable is in the same directory as the code
+it's compiling (as I don't think anyone wants to install the alpha version that's going to have more features
+added). All OS versions utilize the command line to invoke the compiler.
 
 The only two command line arguments at present are
 
@@ -60,19 +157,24 @@ The only two command line arguments at present are
 * "outfilename": this is the name that will be used to create the .asm files associated with the .pl0 file
 
 ### Windows
+
 `
 ./plasm.exe filename.pl0 outfilename
 `
+
 ### Linux/MacOS
+
 `
 ./plasm filename.pl0 outfilename
 `
 
-# PLASM Language
+# ***PLASM*** Language
 
-Note that any of the following sections marked with \* are subject to updates as features are added to the compiler.
+Note that any of the following sections marked with \* are subject to updates as features are added to the
+compiler.
 
 ## Reserved Keywords\*
+
 `
 const
 var
@@ -102,17 +204,20 @@ ROM
 `
 
 ## Other Symbols\*
+
 `
 . $ # @ { } [ ] + - | ^ = < > ? : ; := %A %X %Y %CF %ZF %VF %NF 
 `
 
 ## Compiler Directives\*
+
 `
 %incbin %incasm %unit
 `
 
-## PLASM Program Structure
-PLASM programs have the following structure and declaration order:
+## ***PLASM*** Program Structure
+
+***PLASM*** programs have the following structure and declaration order:
 
 ```
 Global Constant Declaration Block+
@@ -129,12 +234,16 @@ Procedure Code Block
 
 Main Procedure Code Block*
 ```
-Note that anything with '+' is optional and '\*' is only required if you don't use the `%unit` compiler directive at the beginning of the program.
+
+Note that anything with '+' is optional and '\*' is only required if you don't use the `%unit` compiler
+directive at the beginning of the program.
 
 ### Comments
-Comments in PLASM begin with '{' and are terminated by '}'.
+
+Comments in ***PLASM*** begin with '{' and are terminated by '}'.
 
 ### Declaring Constants
+
 Any constant declaration must immediately be followed by assigning it a value.
 
 Global/local constants are declared using the following syntax:
@@ -151,7 +260,8 @@ const
   ;               { Constant declaration must end with ';' }
 ```
 
-The current default behavior at the moment is to add all globa/local constants found by the compiler to a seperate `.inc` file so they can be included in other `.asm` files as needed.
+The current default behavior at the moment is to add all globa/local constants found by the compiler to a
+seperate `.inc` file so they can be included in other `.asm` files as needed.
 
 External/.asm constants are declared with the following syntax:
 
@@ -169,14 +279,20 @@ extern const myOtherConst;
 extern const myConst, myOtherConst;
 ```
 
-Note that the compiler assumes any external identifier you provide exists somewhere and punts verifying that to the target assembler. 
+Note that the compiler assumes any external identifier you provide exists somewhere and punts verifying that
+to the target assembler.
 
 ### A Quick Note About Var/Data Distinction For 6502 Family Only
-It should be noted that the only reason the difference between variables and data exists in PLASM is to account for the Zero Page when targetting 6502 platforms. Data is for anything that doesn't need to take up Zero Page space (like arrays) while only Variables can be pure pointers (to take advantage of the .Y index register) and you can't declare an array inside a `var` block.
 
+It should be noted that the only reason the difference between variables and data exists in ***PLASM*** is to
+account for the Zero Page when targetting 6502 platforms. Data is for anything that doesn't need to take up
+Zero Page space (like arrays) while only Variables can be pure pointers (to take advantage of the .Y index
+register) and you can't declare an array inside a `var` block.
 
 ### Declaring Variables
-Variables are declared in a similar manner to constants, except that no value is assigned at the time of declaration. 
+
+Variables are declared in a similar manner to constants, except that no value is assigned at the time of
+declaration.
 
 Variable Declaration:
 
@@ -196,6 +312,7 @@ extern var v1, v2[];
 ```
 
 ### Declaring Data
+
 Data declarations follow the same pattern as variables, with the following exceptions:
 
 ```
@@ -215,6 +332,7 @@ extern data myData, myArray[], array[] in ROM, otherArray[] in ROM;
 ```
 
 ### Procedure Declaration
+
 Procedures are declared with the following syntax:
 
 ```
@@ -233,10 +351,15 @@ data localArray[4];
 { CODE BLOCK BEGINS HERE }
 ```
 
-One thing to note is while PLASM doesn't have any explicit syntax for declaring/passing arguments to procedures there's nothing stopping you from using local/global variables and/or registers to pass arguments to the procedure or return as many values as you want.
+One thing to note is while ***PLASM*** doesn't have any explicit syntax for declaring/passing arguments to
+procedures there's nothing stopping you from using local/global variables and/or registers to pass arguments
+to the procedure or return as many values as you want.
 
 ### A Quick Note About The "Main" Procedure
-Right now if you want to use a .pl0 file as the "main" file you have to manually include any other .asm files that you compiled or manually wrote. I have a compiler directive I'm working on to address this and automate the step that's at the top of my priority list. 
+
+Right now if you want to use a .pl0 file as the "main" file you have to manually include any other .asm files
+that you compiled or manually wrote. I have a compiler directive I'm working on to address this and automate
+the step that's at the top of my priority list.
 
 ```
 { Directive }
@@ -244,9 +367,11 @@ Right now if you want to use a .pl0 file as the "main" file you have to manually
 ```
 
 ### Register/Flag Access
-PLASM allows access to registers/flags as psuedo-variables inside statements or expressions.
+
+***PLASM*** allows access to registers/flags as psuedo-variables inside statements or expressions.
 
 #### 6502 Registers/Flags
+
 * Accumulator (A) Register: `%A`
 * X Index (X) Register: `%X`
 * Y Index (Y) Register: `%Y`
@@ -255,23 +380,32 @@ PLASM allows access to registers/flags as psuedo-variables inside statements or 
 * Zero (Z) Flag: `%ZF`
 * Carry (C) Flag: `%CF`
 
-NOTE: At this point the compilers only recognizes 6502 registers, but as more processors are added to the back end the compiler will recognize registers based on the target CPU.
+NOTE: At this point the compilers only recognizes 6502 registers, but as more processors are added to the back
+end the compiler will recognize registers based on the target CPU.
 
 ### `mem` Keyword
-PLASM provides a similar concept to BASIC's `PEEK`/`POKE` with the `mem[]` keyword. 
 
-`mem[]` acts as a psuedo variable that allows you to treat memory like a giant array so you can load/store variables/data from anywhere in memory.
+***PLASM*** provides a similar concept to BASIC's `PEEK`/`POKE` with the `mem[]` keyword.
+
+`mem[]` acts as a psuedo variable that allows you to treat memory like a giant array so you can load/store
+variables/data from anywhere in memory.
 
 ### Statements
 
-#### `;` In PLASM VS C
-In C, `;` is considered a statement _terminator_. In PLASM, `;` is a statement _seperator_ which means it's just used to tell where one statement ends and another begins.
+#### `;` In ***PLASM*** VS C
+
+In C, `;` is considered a statement _terminator_. In ***PLASM***, `;` is a statement _seperator_ which means
+it's
+just used to tell where one statement ends and another begins.
 
 ####`begin`...`end` Statement Blocks
-Unlike other C-like languages, PLASM doesn't utilize `{...}` to organize blocks of code. Instead, the keywords `begin...end` are used.
+Unlike other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
+keywords
+`begin...end` are used.
 
 #### Assignment Statements
-The `:=` symbol acts as the assignment operator for PLASM. 
+
+The `:=` symbol acts as the assignment operator for ***PLASM***.
 
 Examples of valid assignment statements:
 
@@ -314,9 +448,13 @@ mem[$1000] := v1;     { Uses hard coded value as address }
 
 #### Assigning Results Of Arithmetic/Bitwise Logic Operations
 
-PLASM only supports the native bitwise/mathematical operations of the CPU, so for the 6502 this means only addition, subraction, Logical AND/OR/EOR, shift/rotate left/right, and increment/decrement expressions are supported. 
+***PLASM*** only supports the native bitwise/mathematical operations of the CPU, so for the 6502 this means
+only
+addition, subraction, Logical AND/OR/EOR, shift/rotate left/right, and increment/decrement expressions are
+supported.
 
-Also note that addition, subtraction, and logical AND/OR/EOR can only be performed as binary operations, meaning:
+Also note that addition, subtraction, and logical AND/OR/EOR can only be performed as binary operations,
+meaning:
 
 ```
 { These are expressions allowed }
@@ -356,6 +494,7 @@ dec %Y;
 ```
 
 #### Procedure Calls
+
 ```
 { Allowed }
 
@@ -366,10 +505,12 @@ call SomeProcedure;
 v1 := SomeProcedure;
 ```
 
-Remember, any input/output to procedures must be handled manually, so it's not possible to assign the result of a procedure call to a variable. 
+Remember, any input/output to procedures must be handled manually, so it's not possible to assign the result
+of a procedure call to a variable.
 
 #### Comparison/Conditional Operators
-PLASM supports the following operators:
+
+***PLASM*** supports the following operators:
 
 ```
 v1 = v2  { Tests equality }
@@ -386,9 +527,12 @@ v1 > v2
 %NF-
 %NF+
 ```
-It should be noted that only one comparison or condition operator may be used per conditional statement (i.e. there's currently no support for Boolean AND/OR/NOT to combine conditional statments)
+
+It should be noted that only one comparison or condition operator may be used per conditional statement (i.e.
+there's currently no support for Boolean AND/OR/NOT to combine conditional statments)
 
 #### `if`...`then`...`else` Statements
+
 These statements work the same as they do in other languages (minus the single conditional constraint).
 
 ```
@@ -405,6 +549,7 @@ end;
 ```
 
 #### `repeat`...`until` Statements
+
 Works the same as a `do`...`while` loop in C or any other C-like language.
 
 ```
@@ -416,6 +561,7 @@ until %Y = 20;
 ```
 
 #### `while`...`do` Statements
+
 Also works the same as `while` loops in other C-like languages.
 
 ```
@@ -428,4 +574,13 @@ end;
 ```
 
 #### `asm {`...`} end` Statements (AKA Inline Assembly)
-PLASM makes no attempt to do anything with assembly inlined between `asm {...} end` blocks but copy and paste it to the final assembly output. So, in that sense, this is another place where PLASM punts any validation to the target assembler. On the one hand, this frees you to do anything the language doesn't support, including accessing const/var/data from outside the block (as PLASM doesn't do anything to mangle names so you can use then 1-1). On the other hand, any assembly syntax errors won't get caught until invoking the assembler.
+
+***PLASM*** makes no attempt to do anything with assembly inlined between `asm {...} end` blocks but copy and
+paste
+it to the final assembly output. So, in that sense, this is another place where ***PLASM*** punts any
+validation to
+the target assembler. On the one hand, this frees you to do anything the language doesn't support, including
+accessing const/var/data from outside the block (as ***PLASM*** doesn't do anything to mangle names so you can
+use
+then 1-1). On the other hand, any assembly syntax errors won't get caught until invoking the assembler.
+
