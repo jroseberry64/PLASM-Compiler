@@ -1,3 +1,9 @@
+{ 
+    NOTE: A huge thanks to John Dale (aka OldSkoolCoder) 
+    and his helpful book "Commanding The Commander X16" for the 
+    knowledge and (adapted) code utilized by this file
+}
+
 %unit
 
 const 
