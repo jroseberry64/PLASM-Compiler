@@ -6,9 +6,10 @@ existing assembly code
 ## Table Of Contents
 
 * [Compatible Targets](#compatible-targets)
-* [Why The Name ***PLASM***?](#why-the-name-plasm)
-* [Design Philosophy](#design-philosophy)
-* [State Of The Compiler](#state-of-the-compiler)
+* [Overview](#overview)
+   * [Why The Name ***PLASM***?](#why-the-name-plasm)
+   * [Design Philosophy](#design-philosophy)
+   * [Current State and Future Roadmap](#current-state-and-future-roadmap)
 * [Installation](#installation)
    * [Windows](#windows)
    * [MacOS/Linux](#macoslinux)
@@ -32,15 +33,15 @@ existing assembly code
       * [`mem` Keyword](#mem-keyword)
       * [Statements](#statements)
          * [`;` In ***PLASM*** VS C](#-in-plasm-vs-c)
-         * [`begin`...`end` Statement Blocks](#begin-end-statement-blocks)
+         * [`begin`...`end` Statement Blocks](#beginend-statement-blocks)
          * [Assignment Statements](#assignment-statements)
          * [Assigning Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
          * [Procedure Calls](#procedure-calls)
          * [Comparison/Conditional Operators](#comparisonconditional-operators)
-         * [`if`...`then`...`else` Statements](#if-then-then-else-statements)
+         * [`if`...`then`...`else` Statements](#ifthenelse-statements)
          * [`repeat`...`until` Statements](#repeatuntil-statements)
          * [`while`...`do` Statements](#whiledo-statements)
-         * [`asm {`...`} end` Statements (AKA Inline Assembly)](#asm-end-statements-aka-inline-assembly)
+         * [`asm {`...`} end` Statements (AKA Inline Assembly)](#asm--end-statements-aka-inline-assembly)
 
 ## Compatible Targets
 
@@ -55,7 +56,11 @@ A list of current and planned targets includes:
 - [ ] `Game Boy Z80` <br/>
 - [ ] Other retro 8/16/32 bit CPUs <br/>
 
-## Why The Name ***PLASM***?
+## Overview
+
+Addressing all curiosities before moving on to the nuts and bolts of the language
+
+### Why The Name ***PLASM***?
 
 ***PLASM*** stands for **PL/0** + **Assembly**
 
@@ -65,7 +70,7 @@ A list of current and planned targets includes:
 * **Assembly**: Being able to seamlessly integrate ***PLASM*** code with pre-existing assembly code is a core
   feature of the language
 
-## Design Philosophy
+### Design Philosophy
 
 The ***PLASM*** language has the bare minimum functionality necessary to be considered a "programming
 language." Branding ***PLASM*** as "*a lightweight programming language*" is shorthand for "*a programming
@@ -73,7 +78,7 @@ language that behaves like a really fancy assembler front end.*"
 
 Rather than try to add every flavor of syntactic sugar under the sun and bang my head against the wall
 trying to optimize the result, I **heavily restricted some features**
-**(***[See Statements](#Statements)***)** of the language in addition to exciting **lower level features** not
+**(***[See Statements](#statements)***)** of the language in addition to exciting **lower level features** not
 typically found in a modern language providing **more control** in order to make it as easy as possible to
 output **efficient compiler generated code**.
 
@@ -91,46 +96,53 @@ popular assembler choices (i.e. `CA65/KickAssembler` for the `6502`) for the tar
 The compiler is designed to **handle a single file at a time**. Though there *are* methods provided to access
 variables/routines outside the file.
 
-## State Of The Compiler
+### Current State and Future Roadmap
 
-I'll address one more thing before moving on to the nuts and bolts of the language.
+The compiler executable is confidently an **Alpha Version** since it achieves all the basic goals I started
+out with, but is a few features short of desired functionality.
 
-Right now the compiler executable achieves all the basic goals I started out with but is a few features short
-of being a full Beta version of the compiler. At a high level what still needs to be added is:
+The **Roadmap to the Beta Version** includes:
 
-* More data types. The initial design choice was to limit data types to strings and native 8-bit size
-  variables. But, after deciding it would be convenient to add pointers to the language I realized that it's
-  not as hard to optimize 16-bit arithmetic/comparisons due to the expression evaluation limitations I decided
-  to enforce, I just haven't finished fully implementing data type declarations and all the code generation
-  that handles multi-byte operations.
+* **More Data Types**
+   * **The Initial Design Choice**: Limit data types to strings and native 8-bit size variables
+   * **Why Include More Data Types**: Pointers are convenient :point_left:
+   * **Goal**:
+      * Optimize 16-bit arithmetic/comparisons (I realized the expression evaluation limitations I decided
+        to enforce make it easy)
+   * **TODO**:
+      * Data type declarations
+      * All the code generation that handles multi-byte operations
 
-* Better configuration options. I overlooked some configuration possibilities when it comes to dealing with
-  what character set the target machine uses (ASCII vs PETSCII mostly) and in order to not break things I (
-  temporarily) removed native string/char support pending command line options/inline compiler directives to
-  deal with this. You are still capable of declaring strings in an assembly file and there's a mechanism to
-  tell the compiler that's what you're doing, but this workaround is only temporary. The Beta version will
-  also include a feature that allows you to tell the compiler you're using this file as a "main" file so it
-  can add more boilerplate to the .asm file, but for now the default behavior is to assume the user will
-  provide their own assembly file to act as the "main" program file.
+* **Better Configuration Options**
+   * **The Design Flaw**: Configuration possibilities were overlooked when it comes to dealing with what
+     character
+     set the target machine uses (`ASCII` vs `PETSCII`)
+   * **The Workaround**: I (temporarily) removed native `string`/`char` support pending command line
+     options/inline compiler
+     directives to deal with this. You are still capable of declaring strings in an assembly file and there's
+     a mechanism
+     to tell the compiler that's what you're doing, but this workaround is only temporary
+   * **Current Default Behavior**: Assume the user will provide their own assembly file to act as the `main`
+     program file
+   * **Goal**: Add more boilerplate to the `.asm` file
+   * **TODO**:
+      * Add a feature to tell the compiler which file to use as the `main` file
 
-* A few other keywords/features to the language and backend optimization passes to the IR to fix things like
-  condensing redundant labels or folding a series of JMP instructions into 1 JMP, telling the compiler it's
-  allowed to perform a tail call, and a few other unnecessary instructions it occasionally generates because
-  the front end can only make so many assumptions. I really wanted to wait to tackle this until I am satisfied
-  that I've added all the language features and there's nothing more I can do in the front end to optimize the
-  IR it outputs. Also, there are a few situations where the compiler doesn't correctly swap a branch
-  instruction for a jump that needs to fixed.
+* **Miscellaneous Features**
+   * Add a few more keywords, features, and backend optimization passes to the IR
+   * A dash of syntactic sugar to make writing some expressions shorter
+   * Support for more assembler back ends. Currently, only `CA65`/`CL65` assembly format is supported.
+   * Uploading the source code. I'd prefer to do some more refactoring/cleanup before sharing the `C` source.
+   * Better compiler error messages
+   * More library code. Currently, only `Commander X16` examples are provided with a minimal amount of tested
+     "library code." More code/platform varieties are in progress
 
-* A dash of syntactic sugar to make writing some expressions shorter
-
-* Support for more assembler back ends. Currently, only CA65/CL65 assembly format is supported.
-
-* Uploading the source code. I'd prefer to do some more refactoring/cleanup before sharing the C source.
-
-* Better compiler error messages
-
-* More library code. Right now I've only provided Commander X16 examples with a minimal amount of tested "
-  library code" but more code/platform varieties is in progress.
+* **Known Bugs** (For the super nerds)
+   * Condensing of redundant labels
+   * Folding a series of JMP instructions into 1 JMP, telling the compiler it's allowed to perform a tail call
+   * A few other unnecessary instructions it occasionally generates because the front end can only make so
+     many assumptions
+   * There are a few specific situations where swapping a branch instruction for a jump is done incorrectly
 
 ## Installation
 
