@@ -1,0 +1,232 @@
+%unit
+
+const 
+    { MISC Consts }
+    
+    { Data Port selection }
+    VERA_DATP0      = 0,
+    VERA_DATP1      = 1,
+
+    { Address stepping direction }
+    VERA_ADDR_DR_FW = 0,
+    VERA_ADDR_DR_BW = 1,
+    
+    { Address increment options }
+    VERA_ADDR_S_0   = 0,
+    VERA_ADDR_S_1   = 1,
+    VERA_ADDR_S_2   = 2,
+    VERA_ADDR_S_4   = 3,
+    VERA_ADDR_S_8   = 4,
+    VERA_ADDR_S_16  = 5,
+    VERA_ADDR_S_32  = 6,
+    VERA_ADDR_S_64  = 7,
+    VERA_ADDR_S_128 = 8,
+    VERA_ADDR_S_256 = 9,
+    VERA_ADDR_S_512 = 10,
+    VERA_ADDR_S_40  = 11,
+    VERA_ADDR_S_80  = 12,
+    VERA_ADDR_S_160 = 13,
+    VERA_ADDR_S_320 = 14,
+    VERA_ADDR_S_640 = 15,
+    
+
+    { Core Registers }
+    VERA_ADDRX_L    = $9F20,
+    VERA_ADDRX_H    = $9F21,
+    VERA_ADDRX_B    = $9F22,
+    VERA_DATA0      = $9F23,
+    VERA_DATA1      = $9F24,
+    VERA_CTRL       = $9F25,
+    VERA_ISR        = $9F26,
+    VERA_EIR        = $9F27,
+
+    { DC Video Registers }
+    
+    { DCSEL = 0 }
+    DC_VIDEO        = $9F29,
+    DC_HSCALE       = $9F2A,
+    DC_VSCALE       = $9F2B,
+    DC_BORDER       = $9F2C,
+
+    { DCSEL = 1 }
+    DC_HSTART       = $9F29,
+    DC_HSTOP        = $9F2A,
+    DC_VSTART       = $9F2B,
+    DC_VSTOP        = $9F2C,
+
+    { Layer Registers }
+    VERA_LAYR0_CONF = $9F2D,
+    VERA_LAYR0_MAPB = $9F2E,
+    VERA_LAYR0_TB_L = $9F2F,
+    VERA_LAYR0_HS_L = $9F30,
+    VERA_LAYR0_HS_H = $9F31,
+    VERA_LAYR0_VS_L = $9F32,
+    VERA_LAYR0_VS_H = $9F33,
+    VERA_LAYR1_CONF = $9F34,
+    VERA_LAYR1_MAPB = $9F35,
+    VERA_LAYR1_TB_L = $9F36,
+    VERA_LAYR1_HS_L = $9F37,
+    VERA_LAYR1_HS_H = $9F38,
+    VERA_LAYR1_VS_L = $9F39,
+    VERA_LAYR1_VS_H = $9F3A,
+
+    { VERA CHIP CONSTANTS }
+    
+    { Hi byte of upper 64k memory }
+    VC_ADDR_UPPER_H = $01,
+
+    { Base address of lo/middle byte for Palette register memory }
+    VC_PLR_B_ADDR_L = $00, 
+    VC_PLR_B_ADDR_M = $FA,
+
+    { Base address of lo/middle byte for PSG register memory }
+    VC_PSR_B_ADDR_L = $C0, 
+    VC_PSR_B_ADDR_M = $F9,
+
+    { Base address of middle byte for sprite register memory }
+    VC_SPR_B_ADDR_M = $C0,
+
+    { Sprite Register offsets }
+    VC_SPR_XL_OFFS  = $00,
+    VC_SPR_XH_OFFS  = $01,
+    VC_SPR_YL_OFFS  = $02,
+    VC_SPR_YH_OFFS  = $03,
+    VC_SPR_TL_OFFS  = $04,
+    VC_SPR_AT_OFFS  = $05,
+    VC_SPR_CL_OFFS  = $06;
+
+var
+    DataPtr[];
+
+data 
+    V_ADDR_L,
+    V_ADDR_M,
+    V_ADDR_H,
+    V_port,
+    V_addr_incr,
+    V_incr_dir;
+
+extern procedure K_memory_copy;
+extern const R0_lo;
+extern const R0_hi;
+extern const R1_lo;
+extern const R1_hi;
+extern const R2_lo;
+extern const R2_hi;
+
+{ 
+    Sets the destination address, port, address increment, 
+    and increment direction in VERA registers. 
+
+    Expects:
+
+    V_ADDR_L: lo-byte of VERA dest addr
+    V_ADDR_M: md-byte of VERA dest addr
+    V_ADDR_H: 0/1 depending on addr
+    V_port: 0/1 depending on data port
+    V_addr_incr: 0-15 depending on desired increment step
+    V_incr_dir: 0/1 depending on direction
+
+    Setup:
+
+    None.
+
+}
+procedure VERA_SetAddrAndIncr;
+begin
+    { Set the data port to use }
+    %A := mem[VERA_CTRL];
+    { Save bits we care about }
+    %A := %A & $FE;
+    %A := %A | V_port;
+    mem[VERA_CTRL] := %A;
+
+    { Set Low and high address VERA registers }
+    mem[VERA_ADDRX_L] := V_ADDR_L;
+    mem[VERA_ADDRX_H] := V_ADDR_M;
+
+    { Calculate bank VERA register }
+    %A := V_addr_incr;
+    
+    { Shift addr increment to proper bit position }
+    shl %A;
+    shl %A;
+    shl %A;
+    shl %A;
+
+    { Add bit to V_ADDR_H }
+    %A := %A | V_ADDR_H;
+    V_ADDR_H := %A;
+
+    { Shift increment dir to proper bit position }
+    %A := V_incr_dir;
+    shl %A;
+    shl %A;
+    shl %A;
+    %A := %A | V_ADDR_H;
+
+    { Save the result in the VERA Bank register }
+    mem[VERA_ADDRX_B] := %A
+end;   
+
+{ 
+    Uses K_memory_copy to copy region specified by DataPtr and 
+    size (word) in .X/.Y 
+
+    Expects:
+
+    DataPtr: addr of memory to copy
+    .X/.Y: size (word) of data
+
+    Setup:
+
+    None.      
+}
+procedure VERA_KCopyDataFromRAM;
+begin
+    asm 
+    {
+        lda DataPtr
+        sta R0_lo
+        lda DataPtr+1
+        sta R0_hi
+        lda #<VERA_DATP0
+        sta R1_lo
+        lda #>VERA_DATP0
+        sta R1_hi
+    }
+    end;
+
+    mem[R2_lo] := %X;
+    mem[R2_hi] := %Y;
+
+    call K_memory_copy;
+end;
+
+{ 
+    Copies up to 255 bytes from RAM to VERA. 
+    Assumes use of Data Port 0. 
+    
+    Expects: 
+    
+    .X: # of bytes to copy
+    DataPtr: addr of data to copy 
+    
+    
+    Setup:
+
+    Call to VERA_SetAddrAndIncr prior to calling 
+    this procedure to setup desired destination.
+}
+procedure VERA_SCopyDataFromRAM;
+begin
+    %Y := 0;
+
+    while %X # 0 do 
+    begin 
+        %A := DataPtr[%Y];
+        mem[VERA_DATP0] := %A;
+        inc %Y;
+        dec %X;
+    end
+end;

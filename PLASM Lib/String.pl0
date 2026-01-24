@@ -1,0 +1,204 @@
+%unit 
+
+var
+    StrPtr1[],
+    StrPtr2[];
+
+extern procedure K_memory_copy;
+extern procedure K_memory_fill;
+extern const R0_lo;
+extern const R0_hi;
+extern const R1_lo;
+extern const R1_hi;
+extern const R2_lo;
+extern const R2_hi;
+
+{ 
+    Sets memory ref'd by StrPtr1 to value stored in .A with mem length word in .X/.Y 
+    using K_memory_fill
+
+    Expects:
+
+    StrPtr1: start addr of memory 
+    .A: value to set memory to
+    .X/.Y: length (word)
+}
+procedure SetMem;
+begin
+    asm 
+    {
+        pha
+    }
+    end;
+
+    mem[R1_lo] := %X;
+    mem[R1_hi] := %Y;
+    asm 
+    {
+        lda StrPtr1
+        sta R0_lo
+        lda StrPtr1+1
+        sta R0_hi
+    }
+    end;
+    
+    asm 
+    {
+        pla
+    }
+    end;
+
+    call K_memory_fill
+end;
+
+{ 
+    Sets memory ref'd by StrPtr1 to 0 with mem length word in .X/.Y 
+
+    Expects:
+
+    StrPtr1: start addr of memory 
+    .X/.Y: length (word)
+}
+procedure ClearMem;
+begin 
+    %A := 0;
+    call SetMem;
+end;
+
+{ 
+    Finds the length of NULL terminated string ref'd by StrPtr1 
+    with max size of 255.
+
+    Expects:
+
+    StrPtr1: start addr of memory 
+    
+    Returns:
+    
+    .Y: length 
+}
+procedure LenStrNT;
+begin 
+    %Y := 0;
+
+    repeat
+    begin
+        %A := StrPtr1[%Y];
+        if %A # 0 then
+            inc %Y
+        else 
+            asm 
+            {
+                iny
+                rts
+            }
+            end
+    end
+    until %Y = 255
+end;
+
+{ 
+    Compares strings up to 255 bytes in length.
+
+    Expects:
+    
+    StrPtr1: addr of first null-terminated string
+    StrPtr2: addr of second null-terminated string
+
+    Returns:
+
+    .CF: 1 if Str1 = Str2, else 0 
+}
+procedure CmpStrNT;
+begin 
+    %Y := 0;
+
+    repeat 
+        if StrPtr1[%Y] = StrPtr2[%Y] then 
+        begin 
+            if StrPtr1[%Y] # 0 then 
+                inc %Y
+            else 
+                asm 
+                {
+                    sec
+                    rts
+                }
+                end
+        end
+        else 
+            asm 
+            {
+                clc
+                rts
+            }
+            end
+    until %Y = 255;
+    
+    asm 
+    {
+        sec
+    }
+    end
+end;
+
+{ 
+    Copies string up to 255 bytes in length.
+
+    Expects:
+    
+    StrPtr1: addr of null-terminated string
+    StrPtr2: dest addr of null-terminated string copy
+}
+procedure CpyStrNT;
+begin
+    %Y := 0;
+
+    repeat
+    begin
+        %A := StrPtr1[%Y];
+        StrPtr2[%Y] := %A;
+
+        if %A = 0 then 
+            asm 
+            {
+                rts
+            }
+            end
+        else 
+            inc %Y
+       
+    end
+    until %Y = 255
+end;
+
+{ 
+    Copies string up to 255 bytes in length using
+    K_memory_copy.
+
+    Expects:
+    
+    .X: length of source string
+    StrPtr1: addr of null-terminated string
+    StrPtr2: dest addr of null-terminated string copy
+}
+procedure KCpyStrNT;
+begin
+    asm 
+    {
+        lda StrPtr1
+        sta R0_lo
+        lda StrPtr1+1
+        sta R0_hi
+        lda StrPtr2
+        sta R1_lo
+        lda StrPtr2+1
+        sta R1_hi
+    }
+    end;
+
+    mem[R2_lo] := %X;
+    mem[R2_hi] := 0;
+
+    call K_memory_copy;
+end;

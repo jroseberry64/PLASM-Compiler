@@ -1,0 +1,194 @@
+var CurrLine;
+
+{ X16Kernal_IO.pl0 }
+extern procedure WriteLn, K_CHRIN, K_CHROUT, ClrScr, SetScrCurXY;
+extern var WriteLnPtr[];
+extern data ReadLnBuffer[], Str[], Str2[];
+
+{ X16_VERA.pl0 }
+extern procedure VERA_SetAddrAndIncr;
+extern data V_ADDR_L, V_ADDR_M, V_ADDR_H, V_port, V_addr_incr, V_incr_dir;
+extern const VERA_ADDR_S_16, VERA_DATP0, VERA_ADDR_DR_FW, VERA_DATA0;
+
+{ String.pl0 }
+extern procedure SetMem, ClearMem, CmpStrNT, LenStrNT;
+extern var StrPtr1[], StrPtr2[];
+extern data CmpStr1[], CmpStr2[], CmpStr3[], Str3[], Str4[], Str5[], Str6[], ErrStr[], DataBuff[];
+
+{ HELPER PROCEDURES }
+
+{ Set CurrLine before calling }
+procedure PrintNextTestStr;
+begin
+    %Y := 0;
+    %X := CurrLine;
+    call SetScrCurXY;
+    
+    WriteLnPtr := @Str2;
+    call WriteLn;
+
+    { 
+        We use K_CHRIN to pause execution and give anyone 
+        who wants a chance to check emulator VERA memory 
+    }
+    call K_CHRIN;
+end;
+
+{ PROCEDURES TO TEST LIBRARY .pl0 FILES }
+
+procedure TestX16Kernal_IO;
+begin
+    { Test ClrScr, SetScrCurXY, and WriteLn }
+    call ClrScr;
+    
+    %Y := 0;
+    %X := CurrLine;
+    call SetScrCurXY;
+
+    WriteLnPtr := @Str;
+    call WriteLn;
+end;
+
+procedure TestX16_VERA_Helpers;
+begin
+    { Setup and call VERA_SetAddrAndIncr }
+    V_ADDR_L := $A5;
+    V_ADDR_M := $38;
+    V_ADDR_H := 1;
+    V_port := VERA_DATP0;
+    V_addr_incr := VERA_ADDR_S_16;
+    V_incr_dir := VERA_ADDR_DR_FW;
+    call VERA_SetAddrAndIncr;
+
+    %X := 8;
+    %A := $55;
+
+    while %X # 0 do 
+    begin 
+        mem[VERA_DATA0] := %A;
+        dec %X 
+    end;
+
+    { Print continue test string and wait for input }
+    call PrintNextTestStr;
+end;
+
+procedure TestString;
+begin
+    { TEST CmpStrNT }
+
+    { These two strings are equal }
+    StrPtr1 := @CmpStr1;
+    StrPtr2 := @CmpStr2;
+    call CmpStrNT;
+
+    { Carry Flag is expected to be set after prev CmpStrNT call }
+    if %CF+ then 
+        WriteLnPtr := @Str3
+    else 
+        WriteLnPtr := @ErrStr;
+   
+    { Print result of test case }
+    call WriteLn;
+
+    { Prompt user to execute next test case }
+    CurrLine := CurrLine + 2;
+    call PrintNextTestStr;
+
+    { These CmpStr1 and CmpStr3 are not equal }
+    StrPtr2 := @CmpStr3;
+    call CmpStrNT;
+
+    { Carry Flag is expected to be clear after prev CmpStrNT call }
+    if %CF+ then 
+        WriteLnPtr := @ErrStr
+    else 
+        WriteLnPtr := @Str3;
+    
+    call WriteLn;
+
+    CurrLine := CurrLine + 2;
+    call PrintNextTestStr;
+
+    { TEST LenStrNT }
+
+    { We can reuse CmpStr1 as the argument }
+    call LenStrNT;
+
+    if %Y < 6 then
+        WriteLnPtr := @ErrStr
+    else 
+        WriteLnPtr := @Str4;
+    
+    call WriteLn;
+
+    CurrLine := CurrLine + 2;
+    call PrintNextTestStr;
+
+    { TEST ClearMem }
+    
+    StrPtr1 := @DataBuff;
+    %X := 4;
+    %Y := 0;
+    call ClearMem;
+
+    { Check to see if we zero'd out the data buffer }
+    %X := 0;
+    WriteLnPtr := @Str5;
+
+    while %X < 4 do 
+    begin
+        %A := DataBuff[%X];
+        if %A # 0 then
+            WriteLnPtr := @ErrStr;
+
+        inc %X
+    end;
+
+    call WriteLn;
+
+    CurrLine := CurrLine + 2;
+    call PrintNextTestStr;
+
+    { Test SetMem }
+    %X := 4;
+    %Y := 0;
+    %A := $FF;
+    call SetMem;
+
+    { Check to see if we filled the data buffer }
+    %X := 0;
+    WriteLnPtr := @Str6;
+
+    while %X < 4 do 
+    begin
+        %A := DataBuff[%X];
+        if %A # $FF then
+        begin
+            WriteLnPtr := @ErrStr;
+            goto NextLn
+        end;
+
+        inc %X
+    end;
+
+?NextLn:
+
+    call WriteLn;
+
+    CurrLine := CurrLine + 2;
+    call PrintNextTestStr;
+
+end;
+
+{ "MAIN" TEST PROCEDURE }
+
+begin
+    CurrLine := 1;
+    call TestX16Kernal_IO;
+
+    CurrLine := CurrLine + 2;
+    call TestX16_VERA_Helpers;
+
+    call TestString;
+end.

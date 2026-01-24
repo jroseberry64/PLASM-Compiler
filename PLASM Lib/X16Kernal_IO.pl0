@@ -1,0 +1,250 @@
+%unit
+
+const
+    { KERNAL SUBROUTINE ADDRESSES }
+    K_ACPTR     = $FFA5,
+    K_MACPTR    = $FF44,
+    K_CIOUT     = $FFA8,
+    K_MCIOUT    = $FEB1,
+    K_SETTMO    = $FFA2,
+    K_LISTEN    = $FFB1,
+    K_UNLSN     = $FFAE,
+    K_SECOND    = $FF93,
+    K_TALK      = $FFB4,
+    K_TKSA      = $FF96,
+    K_UNTLK     = $FFAB,
+    K_SETMSG    = $FF90,
+    K_READST    = $FFB7,
+    K_SETLFS    = $FFBA,
+    K_SETNAM    = $FFBD,
+    K_OPEN      = $FFC0,
+    K_CLOSE     = $FFC3,
+    K_CHKIN     = $FFC6,
+    K_CHKOUT    = $FFC9,
+    K_CLRCHN    = $FFCC,
+    K_CHRIN     = $FFCF,
+    K_CHROUT    = $FFD2,
+    K_LOAD      = $FFD5,
+    K_SAVE      = $FFD8,
+    K_CLALL     = $FFE7,
+    K_IOINIT    = $FF84,
+    K_RESTOR    = $FF8A,
+    K_VECTOR    = $FF8D,
+    K_RAMTAS    = $FF87,
+    K_MEMTOP    = $FF99,
+    K_CINT      = $FF81,
+    K_SCREEN    = $FFED,
+    K_PLOT      = $FFF0,
+    K_SCNKEY    = $FF9F,
+    K_STOP      = $FFE1,
+    K_GETIN     = $FFE4,
+    K_SETTIM    = $FFDB,
+    
+	{ OTHER X16 Kernal Routines with verbose names  }
+	K_memory_copy		= $FEE7,
+	K_memory_fill		= $FEE4,
+	K_scr_set_chrset 	= $FF62,
+	K_cons_get_char 	= $FEE1,
+	K_cons_put_char		= $FEDE,
+
+	{ X16 HW Registers }
+    HI_RAM_REG  = $00,
+    HI_ROM_REG  = $01,
+
+    { TMP: X16 Virtual Registers }
+    R0_lo       = $02,
+    R0_hi       = $03,
+    R1_lo       = $04,
+    R1_hi       = $05,
+    R2_lo       = $06,
+    R2_hi       = $07,
+    R3_lo       = $08,
+    R3_hi       = $09,
+    R4_lo       = $0A,
+    R4_hi       = $0B,
+    R5_lo       = $0C,
+    R5_hi       = $0D,
+    R6_lo       = $0E,
+    R6_hi       = $0F,
+    R7_lo       = $10,
+    R7_hi       = $11,
+    R8_lo       = $12,
+    R8_hi       = $13,
+    R9_lo       = $14,
+    R9_hi       = $15,
+    R10_lo      = $16,
+    R10_hi      = $17,
+    R11_lo      = $18,
+    R11_hi      = $19,
+    R12_lo      = $1A,
+    R12_hi      = $1B,
+    R13_lo      = $1C,
+    R13_hi      = $1D,
+    R14_lo      = $1E,
+    R14_hi      = $1F,
+    R15_lo      = $20,
+    R15_hi      = $21;
+
+var 
+    WriteLnPtr[];
+
+data 
+    ReadLnBuffer[255];
+
+{
+ *  RAM/ROM Bank procedures
+}
+
+{ Expects .A to have BANK# }
+procedure SetHiRAMB;
+begin 
+    mem[HI_RAM_REG] := %A
+end;
+
+{ Stores BANK# in .A }
+procedure GetCurrHiRAMB;
+begin 
+    %A := mem[HI_RAM_REG]
+end;
+
+{ Expects .A to have BANK# }
+procedure SetHiROMB;
+begin 
+    mem[HI_ROM_REG] := %A
+end;
+
+{ Stores BANK# in .A }
+procedure GetCurrHiROMB;
+begin 
+    %A := mem[HI_ROM_REG]
+end;
+
+{
+ *  Screen helper procedures
+}
+
+{ Expects .X/.Y to contain screen coords }
+procedure SetScrCurXY;
+begin 
+    asm 
+    {
+        clc
+    }
+    end;
+    call K_PLOT
+end;
+
+{ Returns screen coords in .X/.Y }
+procedure GetScrCurXY;
+begin 
+    asm 
+    {
+        sec
+    }
+    end;
+    call K_PLOT
+end;
+
+procedure ClrScr;
+data sw, sh;
+begin 
+    { Get screen width/height }
+    call K_SCREEN;
+    
+    { %Y has screen height }
+    sh := %Y;
+    
+    { %X has screen width }
+    sw := %X;
+    
+    { Set registers for SetScrCurXY call }
+    %X := 0;
+    %Y := 0;
+
+   call SetScrCurXY;
+
+   %A := 32;           { SPACE character }
+
+    { Loop and fill screen with ' ' }
+    while %Y < sh do 
+    begin 
+        while %X < sw do 
+        begin 
+            call K_CHROUT;
+            inc %X
+        end;
+        inc %Y;
+        %X := 0
+    end
+end;
+
+{
+ *  Console I/O procedures
+}
+
+{ 
+    Expects:
+    
+    StrOutPtr: addr of null terminated string to print 
+}
+procedure WriteLn;
+begin
+    %Y := 0;
+    %A := WriteLnPtr[%Y];
+    
+    while %A # 0 do 
+    begin
+		asm
+		{
+			sec
+		}
+		end;
+
+        call K_CHROUT;
+        inc %Y;
+
+        if %ZF- then 
+            %A := WriteLnPtr[%Y]
+        else 
+            asm 
+            {
+                rts
+            }
+            end
+    end
+end;
+
+{ 
+    Returns: 
+ 
+    .A: #chars written to input buffer
+    ReadLnBuffer: input string from user 
+}
+procedure ReadLn;
+const 
+    CHR_RET = 13,
+    CHR_LF = 10;
+begin
+    %X := 0;
+
+    call K_cons_get_char;
+    
+    while %A # CHR_RET do 
+    begin
+        ReadLnBuffer[%X] := %A;
+        inc %X;
+
+        if %X # 255 then 
+            call K_cons_get_char
+        else 
+            goto endr
+    end; 
+
+?endr:    
+    %A := %X;
+end;
+
+{
+ *  Joystick I/O procedures
+}
+
