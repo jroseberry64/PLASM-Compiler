@@ -235,6 +235,14 @@ data localArray[4];
 
 One thing to note is while PLASM doesn't have any explicit syntax for declaring/passing arguments to procedures there's nothing stopping you from using local/global variables and/or registers to pass arguments to the procedure or return as many values as you want.
 
+### A Quick Note About The "Main" Procedure
+Right now if you want to use a .pl0 file as the "main" file you have to manually include any other .asm files that you compiled or manually wrote. I have a compiler directive I'm working on to address this and automate the step that's at the top of my priority list. 
+
+```
+{ Directive }
+%main(...)   { (...) -> comma seperated list of files to include in the .asm output file }
+```
+
 ### Register/Flag Access
 PLASM allows access to registers/flags as psuedo-variables inside statements or expressions.
 
