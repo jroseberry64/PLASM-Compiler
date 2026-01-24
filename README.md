@@ -37,6 +37,8 @@ Right now the compiler executable achieves all the basic goals I started out wit
 
 * Uploading the source code. I'd prefer to do some more refactoring/cleanup before sharing the C source.
 
+* Better Error messages 
+
 ## Installation
 The PLASM compiler doesn't have any dependencies besides having the desired assembler backend installed. 
 
