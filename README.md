@@ -11,11 +11,12 @@ existing assembly code
    * [Design Philosophy](#design-philosophy)
    * [Current State and Future Roadmap](#current-state-and-future-roadmap)
 * [Installation](#installation)
-   * [Windows](#windows)
-   * [MacOS/Linux](#macoslinux)
+   * [Windows/MacOS/Linux](#windowsmacoslinux)
 * [Usage](#usage)
-   * [Windows](#windows-1)
-   * [Linux/MacOS](#linuxmacos)
+  * [Command Line Arguments](#command-line-arguments)
+  * [Windows](#windows)
+  * [Linux](#linux)
+  * [MacOS](#macos)
 * [***PLASM*** Language](#plasm-language)
    * [Reserved Keywords*](#reserved-keywords)
    * [Other Symbols*](#other-symbols)
@@ -147,43 +148,60 @@ The **Roadmap to the Beta Version** includes:
 ## Installation
 
 The ***PLASM*** compiler doesn't have any dependencies besides having the desired assembler backend installed.
+During the **Alpha Version**, it is recommended that you download the ***PLASM*** zip file in the same directory as 
+the code/project that you plan to compile with ***PLASM***. The **Beta Version** will have a proper 
+installer and/or instructions to add ***PLASM*** to your system path.
 
-### Windows
+### Windows/MacOS/Linux
 
-There's not much to do other than unzipping the executable.
-
-### MacOS/Linux
-
-MacOS might require you to go to the settings to allow the executable to run.
-Linux might require `chmod` to change the file permissions.
+* Download the latest release for your operating system from the 
+  [Releases](https://github.com/jroseberry64/PLASM-Compiler/releases) page <br/>
+  *Recommended to install in the same directory as your code/project*
+* Unzip the executable
+* Proceed to [Usage](#usage) for instructions on how to run the compiler
 
 ## Usage
 
-Right now the compiler operates under the assumption that the executable is in the same directory as the code
-it's compiling (as I don't think anyone wants to install the alpha version that's going to have more features
-added). All OS versions utilize the command line to invoke the compiler.
+All OS versions utilize the command line to invoke the compiler.
 
-The only two command line arguments at present are
+***Final Reminder: The compiler operates under the assumption that the executable is in the same directory as the code/project
+it's compiling***
 
-* "filename.pl0": the file to compile
-* "outfilename": this is the name that will be used to create the .asm files associated with the .pl0 file
+### Command Line Arguments
+
+* `plasm_filename`: The ***PLASM*** file to compile (i.e. `filename.pl0`)
+* `outfilename`: The name that will be used to create the .asm file(s) (i.e. `outfilename.asm`, `outfilename_vars.asm`, etc.) associated with `plasm_filename`
 
 ### Windows
 
-`
+```shell
 ./plasm.exe filename.pl0 outfilename
-`
+```
 
-### Linux/MacOS
+*(Windows doesn't care about security :satisfied:)*
 
-`
+### MacOS
+
+* Run the executable
+  ***Note:*** *The first time you run the executable, a pop-up might appear asking for permission to run the executable*
+
+```shell
 ./plasm filename.pl0 outfilename
-`
+````
+
+### Linux
+
+* Run the executable
+  ***Note:*** *The first time you run the executable, you may encounter a file permissions error. Run `chmod +x plasm` to fix*
+
+```shell
+./plasm filename.pl0 outfilename
+````
 
 # ***PLASM*** Language
 
-Note that any of the following sections marked with \* are subject to updates as features are added to the
-compiler.
+***Note:*** *that any of the following sections marked with \* are subject to updates as features are added to the
+compiler*
 
 ## Reserved Keywords\*
 
