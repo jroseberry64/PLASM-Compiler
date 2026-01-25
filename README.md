@@ -28,12 +28,12 @@ existing assembly code
       * [Declaring Variables](#declaring-variables)
       * [Declaring Data](#declaring-data)
       * [Declaring Procedures](#declaring-procedures)
-      * [The `Main` Procedure](#the-main-procedure)
+        * [The `main` Procedure](#the-main-procedure)
       * [Register/Flag Access](#registerflag-access)
-         * [6502 Registers/Flags](#6502-registersflags)
-      * [`mem` Keyword](#mem-keyword)
+         * [`6502` Registers/Flags](#6502-registersflags)
+      * [The `mem` Keyword](#the-mem-keyword)
       * [Statements](#statements)
-         * [`;` In ***PLASM*** VS C](#-in-plasm-vs-c)
+         * [`;` in ***PLASM*** vs C](#-in-plasm-vs-c)
          * [`begin`...`end` Statement Blocks](#begin-end-statement-blocks)
          * [Assignment Statements](#assignment-statements)
          * [Assigning Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
@@ -223,11 +223,11 @@ compiler*
 
 (Mostly) Self-explanatory list of reserved keywords in ***PLASM***:
 
-* `const`
-* `var`
-* `data`
+* [`const`](#declaring-constants)
+* [`var`](#declaring-variables)
+* [`data`](#declaring-data)
 * `call`
-* `procedure`
+* [`procedure`](#declaring-procedures)
 * `begin`
 * `end`
 * `if`
@@ -243,7 +243,7 @@ compiler*
 * `ror`
 * `shl`
 * `shr`
-* `mem`
+* [`mem`](#the-mem-keyword)
 * `asm`
 * `extern`
 * `in`
@@ -270,14 +270,15 @@ List of other symbols used in ***PLASM***:
 * `?` 
 * `:` 
 * `;` 
-* `:=` 
-* `%A` 
-* `%X` 
-* `%Y` 
-* `%CF` 
-* `%ZF` 
-* `%VF` 
-* `%NF`
+* `:=`
+* [`6502` Registers/Flags](#6502-registersflags)
+  * [`%A`](#register-flag-a) 
+  * [`%X`](#register-flag-x) 
+  * [`%Y`](#register-flag-y) 
+  * [`%CF`](#register-flag-cf) 
+  * [`%ZF`](#register-flag-zf) 
+  * [`%VF`](#register-flag-vf) 
+  * [`%NF`](#register-flag-nf)
 
 *Some symbols might be different than what you're used to in other languages*
 
@@ -289,7 +290,6 @@ List of keywords that tell the compiler to behave in different ways:
 * `%incbin` 
 * `%incasm` 
 * `%unit`
-
 
 ### Program Structure
 
@@ -458,8 +458,9 @@ data localArray[4];
 procedures. It's recommended to use local/global variables/data and/or registers to pass arguments
 to the procedure or return as many values as you want*
 
-#### The `Main` Procedure
+#### The `main` Procedure
 
+[//]: # (Jon said this doesn't make sense so he needs to rewrite it hehe)
 The `main` procedure is the entry point of the program. It's where execution begins when the program is run.
 The `main` file is normally an assembly file that includes any necessary `.pl0` files. If you want to use a ***PLASM***
 file (ext. `.pl01`) as the `main` file, you have to manually include any other `.asm` files that you've compiled or manually written.
@@ -478,44 +479,65 @@ list. [See it on the Roadmap](#main-directive)
 
 ***PLASM*** allows access to registers/flags as pseudo-variables inside statements or expressions.
 
-#### 6502 Registers/Flags
+#### `6502` Registers/Flags
 
-* Accumulator (A) Register: `%A`
-* X Index (X) Register: `%X`
-* Y Index (Y) Register: `%Y`
-* Negative (N) Flag: `%NF`
-* Overflow (V) Flag: `%VF`
-* Zero (Z) Flag: `%ZF`
-* Carry (C) Flag: `%CF`
+* Accumulator (A) Register: `%A`<a name="register-flag-a"></a>
+* X Index (X) Register: `%X` <a name="register-flag-x"></a>
+* Y Index (Y) Register: `%Y` <a name="register-flag-y"></a>
+* Negative (N) Flag: `%NF` <a name="register-flag-nf"></a>
+* Overflow (V) Flag: `%VF` <a name="register-flag-vf"></a>
+* Zero (Z) Flag: `%ZF` <a name="register-flag-zf"></a>
+* Carry (C) Flag: `%CF` <a name="register-flag-cf"></a>
 
-NOTE: At this point the compilers only recognizes 6502 registers, but as more processors are added to the back
-end the compiler will recognize registers based on the target CPU.
+***Note:*** *The compiler only recognizes `6502` registers. As more processors are added to the back
+end, the compiler will recognize registers based on the target CPU*
 
-### `mem` Keyword
+### The `mem` Keyword
 
-***PLASM*** provides a similar concept to BASIC's `PEEK`/`POKE` with the `mem[]` keyword.
+***PLASM*** provides a similar concept to [`BASIC`](https://en.wikipedia.org/wiki/BASIC)'s `PEEK`/`POKE` with the `mem[]` keyword.
 
-`mem[]` acts as a psuedo variable that allows you to treat memory like a giant array so you can load/store
-variables/data from anywhere in memory.
+`mem[]` acts as a pseudo variable that allows you to treat memory like a giant array.
+This means you can load/store variables/data from anywhere in memory.
 
 ### Statements
 
-#### `;` In ***PLASM*** VS C
+#### `;` in ***PLASM*** vs `C`
 
-In C, `;` is considered a statement _terminator_. In ***PLASM***, `;` is a statement _seperator_ which means
-it's
-just used to tell where one statement ends and another begins.
+In `C`, `;` is considered a statement _terminator_. In ***PLASM***, `;` is a statement _separator_.
+It's used to tell where one statement ends and another begins.
 
-####`begin`...`end` Statement Blocks
+#### `begin`...`end` Statement Blocks
+
 Unlike other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
-keywords
-`begin...end` are used.
+keywords `begin...end` are used
+
+[//]: # (TODO: Jon definitely double check this bc I had copilot auto populate this lol)
+
+```
+{ Single line statement (no begin...end needed) }
+if v1 = v2 then
+  v1 := 1;
+else
+  v1 := 0;
+
+{ Multi-line statement (begin...end needed) }
+if v1 = v2 then
+begin
+  v1 := 1;
+  v2 := 2;
+end
+else
+begin
+  v1 := 0;
+  v2 := 0;
+end;
+```
 
 #### Assignment Statements
 
 The `:=` symbol acts as the assignment operator for ***PLASM***.
 
-Examples of valid assignment statements:
+**Valid Assignments:**
 
 ```
 { Variable assignment }
@@ -523,6 +545,7 @@ Examples of valid assignment statements:
 v1 := 1;         { Assign a constant value }
 v1 := HexConst;
 v1 := NumConst;
+
 v1 := v2;        { Assign the value of one variable to another }
 v1 := mem[$10];  { Assign the value of a memory location }
 v1 := p1[];      { Assign dereferenced pointer value }
@@ -556,13 +579,16 @@ mem[$1000] := v1;     { Uses hard coded value as address }
 
 #### Assigning Results Of Arithmetic/Bitwise Logic Operations
 
-***PLASM*** only supports the native bitwise/mathematical operations of the CPU, so for the 6502 this means
-only
-addition, subraction, Logical AND/OR/EOR, shift/rotate left/right, and increment/decrement expressions are
-supported.
+***PLASM*** only supports the native bitwise/mathematical operations of the CPU. 
+For the `6502`, this means only the `addition`, `subtraction`, logical `AND`/`OR`/`EOR`, `shift`/`rotate`,
+`left`/`right`, and `increment`/`decrement` expressions are supported.
 
-Also note that addition, subtraction, and logical AND/OR/EOR can only be performed as binary operations,
-meaning:
+The `addition`, `subtraction`, and logical `AND`/`OR`/`EOR` are strictly **binary operations**
+
+The `shift`/`rotate`, `left`/`right`, and `increment`/`decrement` are strictly **unary operations**
+
+**Binary Operation Examples:**<br/>
+&ensb;`addition`, `subtraction`, `AND`/`OR`/`EOR`
 
 ```
 { These are expressions allowed }
@@ -577,7 +603,8 @@ v1 := v2 + v3 + v4;
 v1 := v2 & v3 + v4;
 ```
 
-While shift/rotate left/right and increment/decrement are unary operations, meaning:
+**Unary Operation Examples:**
+&ensb;`shift`/`rotate`, `left`/`right`, `increment`/`decrement`
 
 ```
 { This is how to use the unary operators }
@@ -594,7 +621,7 @@ shr %A;
 rol %A;
 ror %A;
 
-{ Note that on the vanilla 6502 there's no 'inc A' instruction }
+{ Note: On the vanilla `6502`, there's no `inc A` instruction }
 inc %X;
 dec %X;
 inc %Y;
@@ -602,6 +629,8 @@ dec %Y;
 ```
 
 #### Procedure Calls
+
+See [Declaring Procedures](#declaring-procedures) for procedure declaration syntax
 
 ```
 { Allowed }
@@ -611,14 +640,14 @@ call SomeProcedure;
 { Not Allowed }
 
 v1 := SomeProcedure;
+v1 := call SomeProcedure;
 ```
 
-Remember, any input/output to procedures must be handled manually, so it's not possible to assign the result
-of a procedure call to a variable.
+Any input/output to procedures must be handled manually. It's not possible to assign the result of a procedure call to a variable/data.
 
 #### Comparison/Conditional Operators
 
-***PLASM*** supports the following operators:
+***PLASM*** supports the following comparison operators:
 
 ```
 v1 = v2  { Tests equality }
@@ -636,12 +665,14 @@ v1 > v2
 %NF+
 ```
 
-It should be noted that only one comparison or condition operator may be used per conditional statement (i.e.
-there's currently no support for Boolean AND/OR/NOT to combine conditional statments)
+***Note:*** *Only one comparison or condition operator may be used per conditional statement.*
+***There is currently no support for combining boolean `AND`/`OR`/`NOT` statements***
 
 #### `if`...`then`...`else` Statements
 
-These statements work the same as they do in other languages (minus the single conditional constraint).
+These statements work the same as they do in other languages (minus the single conditional constraint)
+
+**If...Then...Else Examples:**
 
 ```
 if v1 = v2 then
@@ -656,9 +687,13 @@ begin
 end;
 ```
 
+See also [Begin...End Statement Blocks](#begin-end-statement-blocks)
+
 #### `repeat`...`until` Statements
 
-Works the same as a `do`...`while` loop in C or any other C-like language.
+Works the same as a `do`...`while` loop in `C` or any other C-like language.
+
+**Repeat...Until Example:**
 
 ```
 %Y := 0;
@@ -670,7 +705,7 @@ until %Y = 20;
 
 #### `while`...`do` Statements
 
-Also works the same as `while` loops in other C-like languages.
+Works the same as a `while` loop in `C` or any other C-like language.
 
 ```
 %X := 0;
@@ -681,14 +716,20 @@ begin
 end;
 ```
 
+See also [Begin...End Statement Blocks](#begin-end-statement-blocks)
+
 #### `asm {`...`} end` Statements (AKA Inline Assembly)
 
-***PLASM*** makes no attempt to do anything with assembly inlined between `asm {...} end` blocks but copy and
-paste
-it to the final assembly output. So, in that sense, this is another place where ***PLASM*** punts any
-validation to
-the target assembler. On the one hand, this frees you to do anything the language doesn't support, including
-accessing const/var/data from outside the block (as ***PLASM*** doesn't do anything to mangle names so you can
-use
-then 1-1). On the other hand, any assembly syntax errors won't get caught until invoking the assembler.
+Validation of an `asm {...} end` block is completely deferred to the target assembler. ***PLASM*** doesn't
+attempt to parse or validate any assembly code inlined between the `asm {...} end` blocks.
 
+This frees you to do anything the language doesn't support, including accessing const/var/data from outside the 
+block (***PLASM*** will not alter/mangle names, so you can use them 1-1). The downside is 
+**any assembly syntax errors won't get caught until invoking the assembler**.
+
+```
+asm {
+  LDX #$00
+  STY $0200
+} end
+```
