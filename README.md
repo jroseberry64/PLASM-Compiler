@@ -35,7 +35,7 @@ existing assembly code
       * [Statements and Statement Blocks](#statements-and-statement-blocks)
          * [`;` in ***PLASM*** vs C](#-in-plasm-vs-c)
          * [`begin`...`end`](#begin-end)
-         * [Assignment Statements](#assignment-statements)
+         * [Assignments](#assignments)
          * [Assigning Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
          * [Procedure Calls](#procedure-calls)
          * [Comparison/Conditional Operators](#comparisonconditional-operators)
@@ -537,7 +537,7 @@ begin
 end;
 ```
 
-#### Assignment Statements
+#### Assignments
 
 The `:=` symbol acts as the assignment operator for ***PLASM***.
 
