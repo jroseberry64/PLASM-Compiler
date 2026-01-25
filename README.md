@@ -15,8 +15,8 @@ existing assembly codebases
 * [Usage](#usage)
   * [Command Line Arguments](#command-line-arguments)
   * [Windows](#windows)
-  * [Linux](#linux)
   * [MacOS](#macos)
+  * [Linux](#linux)
 * [The ***PLASM*** Language](#the-plasm-language)
    * [Reserved Keywords](#reserved-keywords)[*](#subject-to-change)
    * [Other Symbols](#other-symbols)[*](#subject-to-change)
@@ -34,7 +34,7 @@ existing assembly codebases
       * [The `mem` Keyword](#the-mem-keyword)
       * [Statements and Statement Blocks](#statements-and-statement-blocks)
          * [`;` in ***PLASM*** vs C](#-in-plasm-vs-c)
-         * [`begin`...`end`](#begin-end)
+         * [`begin`...`end`](#beginend)
          * [Assignments](#assignments)
          * [Assigning Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
          * [Procedure Calls](#procedure-calls)
@@ -226,8 +226,8 @@ compiler*
 * [`data`](#declaring-data)
 * `call`
 * [`procedure`](#declaring-procedures)
-* [`begin`](#begin-end-statement-blocks)
-* [`end`](#begin-end-statement-blocks)
+* [`begin`](#beginend)
+* [`end`](#beginend)
 * [`if`](#ifthenelse-statements)
 * [`then`](#ifthenelse-statements)
 * [`else`](#ifthenelse-statements)
@@ -701,7 +701,7 @@ begin
 end;
 ```
 
-See also [Begin...End](#begin-end)
+See also [Begin...End](#beginend)
 
 #### `repeat`...`until`
 
@@ -730,7 +730,7 @@ begin
 end;
 ```
 
-See also [Begin...End](#begin-end)
+See also [Begin...End](#beginend)
 
 #### `asm {`...`} end` (AKA Inline Assembly)
 
