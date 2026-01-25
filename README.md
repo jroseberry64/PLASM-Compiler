@@ -190,7 +190,8 @@ it's compiling***
 ./plasm filename.pl0 outfilename
 ````
 
-***Note:*** *The first time you run the executable, a pop-up might appear asking for permission to run the executable*
+***Note:*** *The first time you run the executable, a pop-up might appear asking for permission to run the executable.
+If the pop-up doesn't appear or errors persist, you may need to go into your Mac settings and manually allow the executable to run*
 
 ### Linux
 
