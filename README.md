@@ -180,7 +180,7 @@ it's compiling***
 ### Command Line Arguments
 
 * `plasm_filename`: The ***PLASM*** file to compile (i.e. `filename.pl0`)
-* `outfilename`: The name that will be used to create the .asm file(s) (i.e. `outfilename.asm`, `outfilename_vars.asm`, etc.) associated with `plasm_filename`
+* `outfilename`: The name that will be used to create the `.asm` file(s) (i.e. `outfilename.asm`, `outfilename_vars.asm`, etc.) associated with `plasm_filename`
 
 ### Windows
 
@@ -334,7 +334,7 @@ Comments in ***PLASM*** begin with `{` and are terminated by `}`:
 There are three types of constants:
 * Global Constants
 * Local Constants
-* External/.asm Constants
+* External/`.asm` Constants
 
 Currently, constants cannot be an `array` or `pointer` type[*](#subject-to-change)
 
@@ -356,8 +356,8 @@ const
 The compiler adds all global/local constants to a separate `.inc` file so they can be included in other
 `.asm` files as needed
 
-**External/.asm Constant Declaration:**
-External/.asm constants are never initialized with a value
+**External/`.asm` Constant Declaration:**
+External/`.asm` constants are never initialized with a value
 
 ```
 { Declaring a single external constant }
@@ -420,7 +420,7 @@ Data is never initialized with a value. The `array`/`pointer` type is always ind
 data myArray[];    { Default size: 1 }
 data myArray[10];  { Size: 10 }
 
-{ Initialize with .asm/.bin data }
+{ Initialize with `.asm`/`.bin` data }
 data
   myArray[] = %incbin:SomeBinFile.bin,
   array2[] = %incasm:SomeAsmData.asm,
@@ -471,7 +471,7 @@ See the example below:
 
 ```
 { Directive }
-%main(...)   { (...) -> comma seperated list of files to include in the .asm output file }
+%main(...)   { (...) -> comma seperated list of files to include in the `.asm` output file }
 ```
 
 I'm in the process of implementing a compiler directive to address this limitation and automate this step. It's the top of my priority
