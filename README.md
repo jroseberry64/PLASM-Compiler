@@ -178,25 +178,27 @@ it's compiling***
 ./plasm.exe filename.pl0 outfilename
 ```
 
-*(Windows doesn't care about security :satisfied:)*
+*Windows doesn't care about security* :satisfied:
 
 ### MacOS
 
-* Run the executable
-  ***Note:*** *The first time you run the executable, a pop-up might appear asking for permission to run the executable*
+* Run the executable:
 
 ```shell
 ./plasm filename.pl0 outfilename
 ````
+
+***Note:*** *The first time you run the executable, a pop-up might appear asking for permission to run the executable*
 
 ### Linux
 
 * Run the executable
-  ***Note:*** *The first time you run the executable, you may encounter a file permissions error. Run `chmod +x plasm` to fix*
 
 ```shell
 ./plasm filename.pl0 outfilename
 ````
+
+***Note:*** *The first time you run the executable, you may encounter a file permissions error. Run `chmod +x plasm` to fix*
 
 # ***PLASM*** Language
 
