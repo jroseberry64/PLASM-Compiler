@@ -322,9 +322,11 @@ Comments in ***PLASM*** begin with `{` and are terminated by `}`:
 { This is a comment }
 {This is another comment}
 
-{ This is a
+{ 
+  This is a
   multi-line
-  comment }
+  comment 
+}
 ```
 
 ### Declaring Constants
