@@ -206,10 +206,10 @@ If the pop-up doesn't appear or errors persist, you may need to go into your Mac
 
 # ***PLASM*** Language
 
-***Note:*** *that any of the following sections marked with \* are subject to updates as features are added to the
-compiler*
+<a name="subject-to-change">***Note:*** *Any of the following sections marked with \* are subject to updates as features are added to the
+compiler*</a>
 
-## Reserved Keywords\*
+## Reserved Keywords[*](#subject-to-change)
 
 `
 const
