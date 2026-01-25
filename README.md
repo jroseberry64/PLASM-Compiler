@@ -514,22 +514,25 @@ end, the compiler will recognize registers based on the target CPU*
 
 ***PLASM*** provides a similar concept to [`BASIC`](https://en.wikipedia.org/wiki/BASIC)'s `PEEK`/`POKE` with the `mem[]` keyword.
 
-`mem[]` acts as a pseudo variable that allows you to treat memory like a giant array.
-This means you can load/store variables/data from anywhere in memory.
+[//]: # (TODO: I don't have time right now, but add links to the variable and data sections at all mentions)
+`mem[]` acts as a pseudo variable that allows you to treat memory like a giant `array`.
+This means you can load/store `variables`/`data` from anywhere in memory.
 
 ### Statements and Statement Blocks
 
 Statements in ***PLASM*** are similar to statements in other C-like languages with a few key differences
 
-#### `;` in ***PLASM*** vs `C`
+#### The Semi-Colon (`;`) in ***PLASM*** vs `C`
 
-In `C`, `;` is considered a statement _terminator_. In ***PLASM***, `;` is a statement _separator_.
+In `C`, the semi-colon (`;`) is considered a statement _terminator_.
+
+In ***PLASM***, the semi-color (`;`) is a statement _separator_.
 It's used to tell where one statement ends and another begins.
 
 #### `begin`...`end`
 
-Unlike other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
-keywords `begin...end` are used
+Contrary to other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
+keywords [`begin`...`end`](#beginend) are used
 
 [//]: # (TODO: Jon definitely double check this bc I had copilot auto populate this lol)
 
@@ -615,7 +618,7 @@ The `addition`, `subtraction`, and logical `AND`/`OR`/`EOR` are strictly **binar
 The `shift`/`rotate`, `left`/`right`, and `increment`/`decrement` are strictly **unary operations**
 
 **Binary Operation Examples:**<br/>
-&ensb;`addition`, `subtraction`, `AND`/`OR`/`EOR`
+&ensp;`addition`, `subtraction`, `AND`/`OR`/`EOR`
 
 ```
 { These are expressions allowed }
@@ -631,7 +634,7 @@ v1 := v2 & v3 + v4;
 ```
 
 **Unary Operation Examples:**
-&ensb;`shift`/`rotate`, `left`/`right`, `increment`/`decrement`
+&ensp;`shift`/`rotate`, `left`/`right`, `increment`/`decrement`
 
 ```
 { This is how to use the unary operators }
@@ -670,7 +673,7 @@ v1 := SomeProcedure;
 v1 := call SomeProcedure;
 ```
 
-Any input/output to procedures must be handled manually. It's not possible to assign the result of a procedure call to a variable/data.
+Any input/output to procedures must be handled manually. It's not possible to assign the result of a procedure call to a `variable`/`data`.
 
 #### Comparison/Conditional Operators
 
@@ -699,7 +702,7 @@ v1 > v2
 
 These statements work the same as they do in other languages (minus the single conditional constraint)
 
-**If...Then...Else Examples:**
+**`if`...`then`...`else` Examples:**
 
 ```
 if v1 = v2 then
@@ -714,13 +717,13 @@ begin
 end;
 ```
 
-See also [Begin...End](#beginend)
+See also [`begin`...`end`](#beginend)
 
 #### `repeat`...`until`
 
 Works the same as a `do`...`while` loop in `C` or any other C-like language.
 
-**Repeat...Until Example:**
+**`repeat`...`until` Example:**
 
 ```
 %Y := 0;
@@ -734,6 +737,8 @@ until %Y = 20;
 
 Works the same as a `while` loop in `C` or any other C-like language.
 
+**`while`...`do` Example:**
+
 ```
 %X := 0;
 while %X < 5 do
@@ -743,14 +748,14 @@ begin
 end;
 ```
 
-See also [Begin...End](#beginend)
+See also [`begin`...`end`](#beginend)
 
 #### `asm {`...`} end` (AKA Inline Assembly)
 
 Validation of an `asm {...} end` block is completely deferred to the target assembler. ***PLASM*** doesn't
 attempt to parse or validate any assembly code inlined between the `asm {...} end` blocks.
 
-This frees you to do anything the language doesn't support, including accessing const/var/data from outside the 
+This frees you to do anything the language doesn't support, including accessing `const`/`var`/`data` from outside the 
 block or even from your hand written assembly code (***PLASM*** will not alter/mangle names, so you can use them 1-1). 
 The downside is **any assembly syntax errors won't get caught until invoking the assembler**.
 
