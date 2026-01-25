@@ -473,20 +473,20 @@ data localArray[4];
 ```
 
 ***Note:*** ***PLASM*** *Doesn't have any explicit syntax for declaring/passing arguments to
-procedures. However you're free to use local/global variables/data and/or registers to pass arguments
+procedures.* ***However*** *you're free to use local/global variables/data and/or registers to pass arguments
 to the procedure or return as many values as you want*
 
 #### The `main` Procedure
 
-By default PLASM doesn't assume there will be a 'main' procedure in the file it's currently compiling in the sense most programmers are used to. 
+By default ***PLASM*** doesn't assume there will be a `main` procedure in the file it's currently compiling in the sense most programmers are used to. 
 
-In order to make it as easy as possible to integrate PLASM code the compiler's default assumption is you want to use the assembly code the compiler 
-generates elsewhere in a hand written assembly program. 
+In a hand written assembly program, the compiler's default assumption is to use the assembly code generated 
+by the compiler elsewhere. This makes it as easy as possible to integrate ***PLASM*** code
 
-Currently, there is no mechanism to change the default assumption, but I'm in the process of implementing a compiler directive to address this limitation 
+Currently, **there is no mechanism to change the default assumption**. I'm in the process of implementing a compiler directive to address this limitation 
 and automate this step. It's the top of my priority list. [See it on the Roadmap](#main-directive)
 
-Below will be the syntax for telling the compiler to treat the current .pl0 file `begin ... end.` block as the 'main' procedure:
+The syntax for telling the compiler to treat the current `.pl0` file [`begin ... end`](#beginend) block as the `main` procedure:
 
 ```
 { Directive }
