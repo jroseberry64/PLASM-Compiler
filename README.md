@@ -174,6 +174,8 @@ it's compiling***
 
 ### Windows
 
+* Run the executable:
+
 ```shell
 ./plasm.exe filename.pl0 outfilename
 ```
