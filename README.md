@@ -77,7 +77,7 @@ language that behaves like a really fancy assembler front end.*"
 
 Rather than try to add every flavor of syntactic sugar under the sun and bang my head against the wall
 trying to optimize the result, I **heavily restricted some features**
-**(***[See Statements](#statements)***)** of the language in addition to **lower level features** not
+**(***[See Statements](#statements-and-statement-blocks)***)** of the language in addition to **lower level features** not
 typically found in a modern language providing **more control** in order to make it as easy as possible for
 **efficient compiler code generation**.
 
@@ -86,7 +86,10 @@ pure assembly code, but with the capability of **freely inlining assembly anywhe
 language doesn't provide out of the box, enabling more **developer autonomy and control**.
 
 In fact, it's very possible to use ***PLASM*** as a thin wrapper around assembly code while only using the
-compiler to help with organizing variables/data/subroutines.
+compiler to help with organizing `variables`/`data`/`subroutines`. Bear in mind that while this is *technically* 
+achievable, **it's not the intended use** for the language. ***PLASM*** is designed to supplement the process 
+of writing assembly code by taking advantage of the structure and readability a higher level language provides
+without taking away the power and speed that true assembly programming offers.
 
 ***PLASM*** also provides **easy integration of pre-written assembly code**. The compiler doesn't generate a
 binary executable, but rather generates the assembly language files formatted to target one of the existing
