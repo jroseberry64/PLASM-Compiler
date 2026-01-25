@@ -17,24 +17,24 @@ existing assembly code
   * [Windows](#windows)
   * [Linux](#linux)
   * [MacOS](#macos)
-* [***PLASM*** Language](#plasm-language)
-   * [Reserved Keywords*](#reserved-keywords)
-   * [Other Symbols*](#other-symbols)
-   * [Compiler Directives*](#compiler-directives)
-   * [***PLASM*** Program Structure](#plasm-program-structure)
+* [The ***PLASM*** Language](#the-plasm-language)
+   * [Reserved Keywords](#reserved-keywords)[*](#subject-to-change)
+   * [Other Symbols](#other-symbols)[*](#subject-to-change)
+   * [Compiler Directives](#compiler-directives)[*](#subject-to-change)
+   * [Program Structure](#program-structure)
       * [Comments](#comments)
       * [Declaring Constants](#declaring-constants)
-      * [A Quick Note About Var/Data Distinction For 6502 Family Only](#a-quick-note-about-vardata-distinction-for-6502-family-only)
+      * [Variable/Data Distinction for the `6502` Family Only](#variabledata-distinction-for-the-6502-family-only)
       * [Declaring Variables](#declaring-variables)
       * [Declaring Data](#declaring-data)
-      * [Procedure Declaration](#procedure-declaration)
-      * [A Quick Note About The "Main" Procedure](#a-quick-note-about-the-main-procedure)
+      * [Declaring Procedures](#declaring-procedures)
+      * [The `Main` Procedure](#the-main-procedure)
       * [Register/Flag Access](#registerflag-access)
          * [6502 Registers/Flags](#6502-registersflags)
       * [`mem` Keyword](#mem-keyword)
       * [Statements](#statements)
          * [`;` In ***PLASM*** VS C](#-in-plasm-vs-c)
-         * [`begin`...`end` Statement Blocks](#beginend-statement-blocks)
+         * [`begin`...`end` Statement Blocks](#begin-end-statement-blocks)
          * [Assignment Statements](#assignment-statements)
          * [Assigning Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
          * [Procedure Calls](#procedure-calls)
@@ -104,17 +104,25 @@ out with, but is a few features short of desired functionality.
 
 The **Roadmap to the Beta Version** includes:
 
-* **More Data Types**
-   * **The Initial Design Choice**: Limit data types to strings and native 8-bit size variables
-   * **Why Include More Data Types**: Pointers are convenient :point_left:
-   * **Goal**:
-      * Optimize 16-bit arithmetic/comparisons (I realized the expression evaluation limitations I decided
-        to enforce make it easy)
+- [ ] **Main File Compiler Directive**<a name="main-directive"></a>
+   * **The Design Flaw**: Currently, there's no way to tell the compiler to treat a `.pl0` file as the `main`
+     program file without manually including other files
+   * **Goal**: Allow users to write a complete program in a single `.pl0` file without needing to manually
+     include other `.asm` files
    * **TODO**:
-      * Data type declarations
-      * All the code generation that handles multi-byte operations
+     - [ ] Implement the `%main` compiler directive
 
-* **Better Configuration Options**
+- [ ] **More Data Types**
+  * **The Initial Design Choice**: Limit data types to strings and native 8-bit size variables
+    * **Why Include More Data Types**: Pointers are convenient :point_left:
+    * **Goal**:
+       * Optimize 16-bit arithmetic/comparisons (I realized the expression evaluation limitations I decided
+         to enforce make it easy)
+    * **TODO**:
+      - [ ] Data type declarations
+      - [ ] All the code generation that handles multi-byte operations
+
+- [ ] **Better Configuration Options**
    * **The Design Flaw**: Configuration possibilities were overlooked when it comes to dealing with what
      character
      set the target machine uses (`ASCII` vs `PETSCII`)
@@ -127,23 +135,24 @@ The **Roadmap to the Beta Version** includes:
      program file
    * **Goal**: Add more boilerplate to the `.asm` file
    * **TODO**:
-      * Add a feature to tell the compiler which file to use as the `main` file
+     - [ ] Add a feature to tell the compiler which file to use as the `main` file
 
-* **Miscellaneous Features**
-   * Add a few more keywords, features, and backend optimization passes to the IR
-   * A dash of syntactic sugar to make writing some expressions shorter
-   * Support for more assembler back ends. Currently, only `CA65`/`CL65` assembly format is supported.
-   * Uploading the source code. I'd prefer to do some more refactoring/cleanup before sharing the `C` source.
-   * Better compiler error messages
-   * More library code. Currently, only `Commander X16` examples are provided with a minimal amount of tested
+- [ ] **Miscellaneous Features**
+  - [ ] Add a few more keywords, features, and backend optimization passes to the IR
+  - [ ] A dash of syntactic sugar to make writing some expressions shorter
+  - [ ] Support for more assembler back ends. Currently, only `CA65`/`CL65` assembly format is supported.
+  - [ ] A proper typing system with type checking <a name="roadmap-types"></a>
+  - [ ] Uploading the source code. I'd prefer to do some more refactoring/cleanup before sharing the `C` source.
+  - [ ] Better compiler error messages
+  - [ ] More library code. Currently, only `Commander X16` examples are provided with a minimal amount of tested
      "library code." More code/platform varieties are in progress
 
-* **Known Bugs** (For the super nerds)
-   * Condensing of redundant labels
-   * Folding a series of JMP instructions into 1 JMP, telling the compiler it's allowed to perform a tail call
-   * A few other unnecessary instructions it occasionally generates because the front end can only make so
+- [ ] **Known Bugs** (For the super nerds)
+  - [ ] Condensing of redundant labels
+  - [ ] Folding a series of JMP instructions into 1 JMP, telling the compiler it's allowed to perform a tail call
+  - [ ] A few other unnecessary instructions it occasionally generates because the front end can only make so
      many assumptions
-   * There are a few specific situations where swapping a branch instruction for a jump is done incorrectly
+  - [ ] There are a few specific situations where swapping a branch instruction for a jump is done incorrectly
 
 ## Installation
 
@@ -204,15 +213,15 @@ If the pop-up doesn't appear or errors persist, you may need to go into your Mac
 
 ***Note:*** *The first time you run the executable, you may encounter a file permissions error. Run `chmod +x plasm` to fix*
 
-# ***PLASM*** Language
+## The ***PLASM*** Language
 
 <a name="subject-to-change"></a>
 ***Note:*** *Any of the following sections marked with \* are subject to updates as features are added to the
 compiler*
 
-## Reserved Keywords[*](#subject-to-change)
+### Reserved Keywords[*](#subject-to-change)
 
-Self-explanatory list of reserved keywords in ***PLASM***:
+(Mostly) Self-explanatory list of reserved keywords in ***PLASM***:
 
 * `const`
 * `var`
@@ -241,7 +250,7 @@ Self-explanatory list of reserved keywords in ***PLASM***:
 * `ROM`
 
 
-## Other Symbols[*](#subject-to-change)
+### Other Symbols[*](#subject-to-change)
 
 List of other symbols used in ***PLASM***:
 
@@ -273,13 +282,16 @@ List of other symbols used in ***PLASM***:
 *Some symbols might be different than what you're used to in other languages*
 
 
-## Compiler Directives[*](#subject-to-change)
+### Compiler Directives[*](#subject-to-change)
 
-`
-%incbin %incasm %unit
-`
+List of keywords that tell the compiler to behave in different ways:
 
-## ***PLASM*** Program Structure
+* `%incbin` 
+* `%incasm` 
+* `%unit`
+
+
+### Program Structure
 
 ***PLASM*** programs have the following structure and declaration order:
 
@@ -299,21 +311,36 @@ Procedure Code Block
 Main Procedure Code Block*
 ```
 
-Note that anything with '+' is optional and '\*' is only required if you don't use the `%unit` compiler
-directive at the beginning of the program.
+***Note:*** *Anything with `+` is optional. Anything with `*` is only required if you don't use the `%unit` compiler
+directive at the beginning of the program*
 
 ### Comments
 
-Comments in ***PLASM*** begin with '{' and are terminated by '}'.
+Comments in ***PLASM*** begin with `{` and are terminated by `}`:
+
+```
+{ This is a comment }
+{This is another comment}
+
+{ This is a
+  multi-line
+  comment }
+```
 
 ### Declaring Constants
 
-Any constant declaration must immediately be followed by assigning it a value.
+There are three types of constants:
+* Global Constants
+* Local Constants
+* External/.asm Constants
 
-Global/local constants are declared using the following syntax:
+Currently, constants cannot be an `array` or `pointer` type[*](#subject-to-change)
+
+**Global and Local Constant Declaration:**<br/>
+All global and local constant declarations are immediately initialized with a value
 
 ```
-{ Declaring 1 constant }
+{ Declaring a single constant }
 const myConst = 1;
 
 { Declaring multiple constants }
@@ -324,13 +351,14 @@ const
   ;               { Constant declaration must end with ';' }
 ```
 
-The current default behavior at the moment is to add all globa/local constants found by the compiler to a
-seperate `.inc` file so they can be included in other `.asm` files as needed.
+The compiler adds all global/local constants to a separate `.inc` file so they can be included in other
+`.asm` files as needed
 
-External/.asm constants are declared with the following syntax:
+**External/.asm Constant Declaration:**
+External/.asm constants are never initialized with a value
 
 ```
-{ Declaring 1 external constant. Note that we don't assign a value to external constants }
+{ Declaring a single external constant }
 extern const myConst;
 
 { Declaring multiple external constants }
@@ -343,44 +371,50 @@ extern const myOtherConst;
 extern const myConst, myOtherConst;
 ```
 
-Note that the compiler assumes any external identifier you provide exists somewhere and punts verifying that
-to the target assembler.
+***Note:*** *The compiler assumes any provided external identifier already exists somewhere. The target assembler 
+is responsible for verifying the constant variable's existence*
 
-### A Quick Note About Var/Data Distinction For 6502 Family Only
+### Variable/Data Distinction for the `6502` Family Only
 
-It should be noted that the only reason the difference between variables and data exists in ***PLASM*** is to
-account for the Zero Page when targetting 6502 platforms. Data is for anything that doesn't need to take up
-Zero Page space (like arrays) while only Variables can be pure pointers (to take advantage of the .Y index
-register) and you can't declare an array inside a `var` block.
+The only reason the difference between variables and data exists in ***PLASM*** is to account for the `Zero Page` when targeting `6502` platforms.
+Data is for anything that doesn't need to take up `Zero Page` space (like `arrays`), while only `Variables` can be pure `pointers` (to take advantage of the `.Y` index
+register). Therefore an `array` cannot be declared inside a `var` block.
 
 ### Declaring Variables
 
-Variables are declared in a similar manner to constants, except that no value is assigned at the time of
-declaration.
+[//]: # (TODO: Discuss with Jon the differences between being able to initialize var/data pointers/arrays with values or not)
 
-Variable Declaration:
+**Variable Declaration:**<br/>
+Variables are never initialized with a value. The `array`/`pointer` type is always indexed starting at 0 with a default size of 1
 
 ```
-{ Variable types }
-var byteVar;  { Declares a variable with a default type of unsigned byte }
+{ Variable Types }
+var byteVar;  { Declares a variable with the default type of unsigned byte }
 var ptrVar[]; { Declares a pointer to any type }
 
-{ Declaring multiple variables }
+{ Declaring Multiple Variables }
 var
   var1,
   ptrV1[],
   var2;
 
-{ Declaring external variables }
+{ Declaring External Variables }
 extern var v1, v2[];
 ```
 
+*A proper typing system with multiple data types is planned for a future version of the compiler. [See it on the Roadmap](#roadmap-types)*
+
 ### Declaring Data
 
-Data declarations follow the same pattern as variables, with the following exceptions:
+[//]: # (TODO: Discuss with Jon the differences between being able to initialize var/data pointers/arrays with values or not)
+
+Data declarations are similar to variable declarations with a few key differences
+
+**Data Declaration:**<br/>
+Data is never initialized with a value. The `array`/`pointer` type is always indexed starting at 0 with a default size of 1
 
 ```
-{ Declaring an array }
+{ Declaring an Array }
 data myArray[];    { Default size: 1 }
 data myArray[10];  { Size: 10 }
 
@@ -388,16 +422,21 @@ data myArray[10];  { Size: 10 }
 data
   myArray[] = %incbin:SomeBinFile.bin,
   array2[] = %incasm:SomeAsmData.asm,
-  romArr[] = %incbin:File.bin in ROM    { This tells the compiler that we can expect this data to be READ ONLY }
+  romArr[] = %incbin:File.bin in ROM    { `in ROM` tells the compiler that the data is expected to be `READ ONLY` }
 ;
 
 { External declaration }
 extern data myData, myArray[], array[] in ROM, otherArray[] in ROM; 
 ```
 
-### Procedure Declaration
+*A proper typing system with multiple data types is planned for a future version of the compiler. [See it on the Roadmap](#roadmap-types)*
 
-Procedures are declared with the following syntax:
+### Declaring Procedures
+
+Equivalent to functions/subroutines in other languages, procedures are blocks of code that can be called from
+other parts of the program
+
+**Procedure Declaration:**
 
 ```
 { Procedure declaration }
@@ -415,24 +454,29 @@ data localArray[4];
 { CODE BLOCK BEGINS HERE }
 ```
 
-One thing to note is while ***PLASM*** doesn't have any explicit syntax for declaring/passing arguments to
-procedures there's nothing stopping you from using local/global variables and/or registers to pass arguments
-to the procedure or return as many values as you want.
+***Note:*** ***PLASM*** *Doesn't have any explicit syntax for declaring/passing arguments to
+procedures. It's recommended to use local/global variables/data and/or registers to pass arguments
+to the procedure or return as many values as you want*
 
-### A Quick Note About The "Main" Procedure
+#### The `Main` Procedure
 
-Right now if you want to use a .pl0 file as the "main" file you have to manually include any other .asm files
-that you compiled or manually wrote. I have a compiler directive I'm working on to address this and automate
-the step that's at the top of my priority list.
+The `main` procedure is the entry point of the program. It's where execution begins when the program is run.
+The `main` file is normally an assembly file that includes any necessary `.pl0` files. If you want to use a ***PLASM***
+file (ext. `.pl01`) as the `main` file, you have to manually include any other `.asm` files that you've compiled or manually written.
+
+See the example below:
 
 ```
 { Directive }
 %main(...)   { (...) -> comma seperated list of files to include in the .asm output file }
 ```
 
+I'm in the process of implementing a compiler directive to address this limitation and automate this step. It's the top of my priority
+list. [See it on the Roadmap](#main-directive)
+
 ### Register/Flag Access
 
-***PLASM*** allows access to registers/flags as psuedo-variables inside statements or expressions.
+***PLASM*** allows access to registers/flags as pseudo-variables inside statements or expressions.
 
 #### 6502 Registers/Flags
 
