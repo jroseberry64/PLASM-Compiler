@@ -148,6 +148,7 @@ The **Roadmap to the Beta Version** includes:
 ## Installation
 
 The ***PLASM*** compiler doesn't have any dependencies besides having the desired assembler backend installed.
+
 During the **Alpha Version**, it is recommended that you download the ***PLASM*** zip file in the same directory as 
 the code/project that you plan to compile with ***PLASM***. The **Beta Version** will have a proper 
 installer and/or instructions to add ***PLASM*** to your system path.
