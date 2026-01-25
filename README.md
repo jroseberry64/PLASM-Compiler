@@ -32,17 +32,17 @@ existing assembly code
       * [Register/Flag Access](#registerflag-access)
          * [`6502` Registers/Flags](#6502-registersflags)
       * [The `mem` Keyword](#the-mem-keyword)
-      * [Statements](#statements)
+      * [Statements and Statement Blocks](#statements-and-statement-blocks)
          * [`;` in ***PLASM*** vs C](#-in-plasm-vs-c)
-         * [`begin`...`end` Statement Blocks](#begin-end-statement-blocks)
+         * [`begin`...`end`](#begin-end)
          * [Assignment Statements](#assignment-statements)
          * [Assigning Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
          * [Procedure Calls](#procedure-calls)
          * [Comparison/Conditional Operators](#comparisonconditional-operators)
-         * [`if`...`then`...`else` Statements](#ifthenelse-statements)
-         * [`repeat`...`until` Statements](#repeatuntil-statements)
-         * [`while`...`do` Statements](#whiledo-statements)
-         * [`asm {`...`} end` Statements (AKA Inline Assembly)](#asm--end-statements-aka-inline-assembly)
+         * [`if`...`then`...`else`](#ifthenelse)
+         * [`repeat`...`until`](#repeatuntil)
+         * [`while`...`do`](#whiledo)
+         * [`asm {`...`} end` (AKA Inline Assembly)](#asm--end-aka-inline-assembly)
 
 ## Compatible Targets
 
@@ -228,15 +228,15 @@ compiler*
 * [`data`](#declaring-data)
 * `call`
 * [`procedure`](#declaring-procedures)
-* `begin`
-* `end`
-* `if`
-* `then`
-* `else`
-* `while`
-* `do`
-* `repeat`
-* `until`
+* [`begin`](#begin-end-statement-blocks)
+* [`end`](#begin-end-statement-blocks)
+* [`if`](#ifthenelse-statements)
+* [`then`](#ifthenelse-statements)
+* [`else`](#ifthenelse-statements)
+* [`while`](#whiledo-statements)
+* [`do`](#whiledo-statements)
+* [`repeat`](#repeatuntil-statements)
+* [`until`](#repeatuntil-statements)
 * `inc`
 * `dec`
 * `rol`
@@ -501,14 +501,16 @@ end, the compiler will recognize registers based on the target CPU*
 `mem[]` acts as a pseudo variable that allows you to treat memory like a giant array.
 This means you can load/store variables/data from anywhere in memory.
 
-### Statements
+### Statements and Statement Blocks
+
+Statements in ***PLASM*** are similar to statements in other C-like languages with a few key differences
 
 #### `;` in ***PLASM*** vs `C`
 
 In `C`, `;` is considered a statement _terminator_. In ***PLASM***, `;` is a statement _separator_.
 It's used to tell where one statement ends and another begins.
 
-#### `begin`...`end` Statement Blocks
+#### `begin`...`end`
 
 Unlike other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
 keywords `begin...end` are used
@@ -670,7 +672,7 @@ v1 > v2
 ***Note:*** *Only one comparison or condition operator may be used per conditional statement.*
 ***There is currently no support for combining boolean `AND`/`OR`/`NOT` statements***
 
-#### `if`...`then`...`else` Statements
+#### `if`...`then`...`else`
 
 These statements work the same as they do in other languages (minus the single conditional constraint)
 
@@ -689,9 +691,9 @@ begin
 end;
 ```
 
-See also [Begin...End Statement Blocks](#begin-end-statement-blocks)
+See also [Begin...End](#begin-end)
 
-#### `repeat`...`until` Statements
+#### `repeat`...`until`
 
 Works the same as a `do`...`while` loop in `C` or any other C-like language.
 
@@ -705,7 +707,7 @@ repeat
 until %Y = 20;
 ```
 
-#### `while`...`do` Statements
+#### `while`...`do`
 
 Works the same as a `while` loop in `C` or any other C-like language.
 
@@ -718,9 +720,9 @@ begin
 end;
 ```
 
-See also [Begin...End Statement Blocks](#begin-end-statement-blocks)
+See also [Begin...End](#begin-end)
 
-#### `asm {`...`} end` Statements (AKA Inline Assembly)
+#### `asm {`...`} end` (AKA Inline Assembly)
 
 Validation of an `asm {...} end` block is completely deferred to the target assembler. ***PLASM*** doesn't
 attempt to parse or validate any assembly code inlined between the `asm {...} end` blocks.
