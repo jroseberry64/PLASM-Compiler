@@ -212,41 +212,68 @@ compiler*
 
 ## Reserved Keywords[*](#subject-to-change)
 
-`
-const
-var
-data
-call
-procedure
-begin
-end
-if
-then
-else
-while
-do
-repeat
-until
-inc
-dec
-rol
-ror
-shl
-shr
-mem
-asm
-extern
-in
-ROM
-`
+Self-explanatory list of reserved keywords in ***PLASM***:
 
-## Other Symbols\*
+* `const`
+* `var`
+* `data`
+* `call`
+* `procedure`
+* `begin`
+* `end`
+* `if`
+* `then`
+* `else`
+* `while`
+* `do`
+* `repeat`
+* `until`
+* `inc`
+* `dec`
+* `rol`
+* `ror`
+* `shl`
+* `shr`
+* `mem`
+* `asm`
+* `extern`
+* `in`
+* `ROM`
 
-`
-. $ # @ { } [ ] + - | ^ = < > ? : ; := %A %X %Y %CF %ZF %VF %NF 
-`
 
-## Compiler Directives\*
+## Other Symbols[*](#subject-to-change)
+
+List of other symbols used in ***PLASM***:
+
+* `.`
+* `$`
+* `#`
+* `@`
+* `{` `}`
+* `[` `]` 
+* `+` 
+* `-` 
+* `|` 
+* `^` 
+* `=` 
+* `<` 
+* `>`
+* `?` 
+* `:` 
+* `;` 
+* `:=` 
+* `%A` 
+* `%X` 
+* `%Y` 
+* `%CF` 
+* `%ZF` 
+* `%VF` 
+* `%NF`
+
+*Some symbols might be different than what you're used to in other languages*
+
+
+## Compiler Directives[*](#subject-to-change)
 
 `
 %incbin %incasm %unit
