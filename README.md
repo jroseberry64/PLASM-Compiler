@@ -206,7 +206,8 @@ If the pop-up doesn't appear or errors persist, you may need to go into your Mac
 
 # ***PLASM*** Language
 
-***Note:*** *Any of the following sections marked with <a name="subject-to-change" style="text-decoration: none;">\*</a> are subject to updates as features are added to the
+<a name="subject-to-change"></a>
+***Note:*** *Any of the following sections marked with \* are subject to updates as features are added to the
 compiler*
 
 ## Reserved Keywords[*](#subject-to-change)
