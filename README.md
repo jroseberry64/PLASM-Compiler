@@ -1,7 +1,7 @@
 # PLASM
 
 A lightweight programming language for retro computing platforms designed to integrate seamlessly with
-existing assembly code
+existing assembly codebases
 
 ## Table Of Contents
 
@@ -46,7 +46,7 @@ existing assembly code
 
 ## Compatible Targets
 
-Currently it only targets the `6502`, but the long term goal is to extend multiple other retro CPUs.
+Currently only targets the `6502`, but the long term goal is to extend multiple other retro CPUs.
 A list of current and planned targets includes:
 
 - [x] `6502` <br/>
@@ -59,14 +59,12 @@ A list of current and planned targets includes:
 
 ## Overview
 
-Addressing all curiosities before moving on to the nuts and bolts of the language
-
 ### Why The Name ***PLASM***?
 
 ***PLASM*** stands for **PL/0** + **Assembly**
 
 * **PL/0**: The basis of the language's syntax is `PL/0` (Pascal's less capable cousin) with some additional
-  syntax borrowed from `Super Pascal` for the `Commodore 64` and a little bit from `C`
+  syntax borrowed from `Super Pascal` for the Commodore 64 and a little bit from `C`
 
 * **Assembly**: Being able to seamlessly integrate ***PLASM*** code with pre-existing assembly code is a core
   feature of the language
@@ -74,18 +72,18 @@ Addressing all curiosities before moving on to the nuts and bolts of the languag
 ### Design Philosophy
 
 The ***PLASM*** language has the bare minimum functionality necessary to be considered a "programming
-language." Branding ***PLASM*** as "*a lightweight programming language*" is shorthand for "*a programming
+language." Branding ***PLASM*** as "*a lightweight programming language*" is really shorthand for "*a programming
 language that behaves like a really fancy assembler front end.*"
 
 Rather than try to add every flavor of syntactic sugar under the sun and bang my head against the wall
 trying to optimize the result, I **heavily restricted some features**
-**(***[See Statements](#statements)***)** of the language in addition to exciting **lower level features** not
-typically found in a modern language providing **more control** in order to make it as easy as possible to
-output **efficient compiler generated code**.
+**(***[See Statements](#statements)***)** of the language in addition to **lower level features** not
+typically found in a modern language providing **more control** in order to make it as easy as possible for
+**efficient compiler code generation**.
 
 The idea is to provide *just enough* of a language that it's **faster** and **less error prone** than writing
 pure assembly code, but with the capability of **freely inlining assembly anywhere** to achieve anything the
-language doesn't provide out of the box enabling more **developer autonomy**.
+language doesn't provide out of the box, enabling more **developer autonomy and control**.
 
 In fact, it's very possible to use ***PLASM*** as a thin wrapper around assembly code while only using the
 compiler to help with organizing variables/data/subroutines.
@@ -100,7 +98,7 @@ variables/routines outside the file.
 ### Current State and Future Roadmap
 
 The compiler executable is confidently an **Alpha Version** since it achieves all the basic goals I started
-out with, but is a few features short of desired functionality.
+out with, but is a few features short of desired production ready functionality.
 
 The **Roadmap to the Beta Version** includes:
 
@@ -147,7 +145,7 @@ The **Roadmap to the Beta Version** includes:
   - [ ] More library code. Currently, only `Commander X16` examples are provided with a minimal amount of tested
      "library code." More code/platform varieties are in progress
 
-- [ ] **Known Bugs** (For the super nerds)
+- [ ] **Known Bugs/Inefficient Code Generation** (For the super nerds)
   - [ ] Condensing of redundant labels
   - [ ] Folding a series of JMP instructions into 1 JMP, telling the compiler it's allowed to perform a tail call
   - [ ] A few other unnecessary instructions it occasionally generates because the front end can only make so
@@ -378,13 +376,16 @@ is responsible for verifying the constant variable's existence*
 
 ### Variable/Data Distinction for the `6502` Family Only
 
-The only reason the difference between variables and data exists in ***PLASM*** is to account for the `Zero Page` when targeting `6502` platforms.
+The main reason the difference between variables and data exists in ***PLASM*** is to account for the `Zero Page` when targeting `6502` platforms.
 Data is for anything that doesn't need to take up `Zero Page` space (like `arrays`), while only `Variables` can be pure `pointers` (to take advantage of the `.Y` index
 register). Therefore an `array` cannot be declared inside a `var` block.
 
+The other rationale is giving the programmer the ability to better seperate what belongs in RAM/ROM for cartridge based systems and making it easy to embed 
+binary/.asm data exported from any of the popular retro gamedev tools inside PLASM.
+
 ### Declaring Variables
 
-[//]: # (TODO: Discuss with Jon the differences between being able to initialize var/data pointers/arrays with values or not)
+[//]: # (TODO: Discuss the differences between being able to initialize var/data pointers/arrays with values or not)
 
 **Variable Declaration:**<br/>
 Variables are never initialized with a value. The `array`/`pointer` type is always indexed starting at 0 with a default size of 1
@@ -410,10 +411,12 @@ extern var v1, v2[];
 
 [//]: # (TODO: Discuss with Jon the differences between being able to initialize var/data pointers/arrays with values or not)
 
-Data declarations are similar to variable declarations with a few key differences
+Data declarations are similar to variable declarations with a key difference regarding arrays.
 
 **Data Declaration:**<br/>
-Data is never initialized with a value. The `array`/`pointer` type is always indexed starting at 0 with a default size of 1
+Pointers/byte values are never initialized with a value and the `array`/`pointer` type is still always indexed starting at 0 with a default size of 1. 
+Arrays can optionally be initialized with the `%incbin` and `%incasm` directives and the syntax for more traditional array initialization is a planned feature for
+the Beta version.
 
 ```
 { Declaring an Array }
@@ -457,25 +460,25 @@ data localArray[4];
 ```
 
 ***Note:*** ***PLASM*** *Doesn't have any explicit syntax for declaring/passing arguments to
-procedures. It's recommended to use local/global variables/data and/or registers to pass arguments
+procedures. However you're free to use local/global variables/data and/or registers to pass arguments
 to the procedure or return as many values as you want*
 
 #### The `main` Procedure
 
-[//]: # (Jon said this doesn't make sense so he needs to rewrite it hehe)
-The `main` procedure is the entry point of the program. It's where execution begins when the program is run.
-The `main` file is normally an assembly file that includes any necessary `.pl0` files. If you want to use a ***PLASM***
-file (ext. `.pl01`) as the `main` file, you have to manually include any other `.asm` files that you've compiled or manually written.
+By default PLASM doesn't assume there will be a 'main' procedure in the file it's currently compiling in the sense most programmers are used to. 
 
-See the example below:
+In order to make it as easy as possible to integrate PLASM code the compiler's default assumption is you want to use the assembly code the compiler 
+generates elsewhere in a hand written assembly program. 
+
+Currently, there is no mechanism to change the default assumption, but I'm in the process of implementing a compiler directive to address this limitation 
+and automate this step. It's the top of my priority list. [See it on the Roadmap](#main-directive)
+
+Below will be the syntax for telling the compiler to treat the current .pl0 file `begin ... end.` block as the 'main' procedure:
 
 ```
 { Directive }
 %main(...)   { (...) -> comma seperated list of files to include in the `.asm` output file }
 ```
-
-I'm in the process of implementing a compiler directive to address this limitation and automate this step. It's the top of my priority
-list. [See it on the Roadmap](#main-directive)
 
 ### Register/Flag Access
 
@@ -520,7 +523,7 @@ keywords `begin...end` are used
 ```
 { Single line statement (no begin...end needed) }
 if v1 = v2 then
-  v1 := 1;
+  v1 := 1
 else
   v1 := 0;
 
@@ -528,13 +531,20 @@ else
 if v1 = v2 then
 begin
   v1 := 1;
-  v2 := 2;
+  v2 := 2
 end
 else
 begin
   v1 := 0;
-  v2 := 0;
+  v2 := 0
 end;
+
+{ 'main' procedure begin...end block }
+begin
+
+{ Code goes here }
+
+end. { Note that the 'main' procedure block must be terminated by '.' }
 ```
 
 #### Assignments
@@ -728,12 +738,24 @@ Validation of an `asm {...} end` block is completely deferred to the target asse
 attempt to parse or validate any assembly code inlined between the `asm {...} end` blocks.
 
 This frees you to do anything the language doesn't support, including accessing const/var/data from outside the 
-block (***PLASM*** will not alter/mangle names, so you can use them 1-1). The downside is 
-**any assembly syntax errors won't get caught until invoking the assembler**.
+block or even from your hand written assembly code (***PLASM*** will not alter/mangle names, so you can use them 1-1). 
+The downside is **any assembly syntax errors won't get caught until invoking the assembler**.
 
 ```
+{ Allowed }
 asm {
-  LDX #$00
-  STY $0200
+  ldx #$00
+  sty $0200
 } end
+
+{ Allowed }
+asm
+{
+  ldx #$00
+  sty $0200
+}
+end
+
+{ Not Allowed (inline assembly code must start on a new line) }
+asm { rts } end
 ```
