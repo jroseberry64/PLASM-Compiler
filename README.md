@@ -113,15 +113,25 @@ The **Roadmap to the Beta Version** includes:
    * **TODO**:
      - [ ] Implement the `%main` compiler directive
 
+[//]: # (TODO: Jon, double check this section for accuracy lol)
+- [ ] **Traditional Array Syntax**<a name="traditional-array-syntax"></a>
+   * **The Design Flaw**: `X`/`Y` index registers are only supported for pointer/array dereferencing
+     inside expressions/statements. There's no way to declare an array with a specific size and initialize
+     it with values like in other languages
+   * **Goal**: Allow users to declare/initialize arrays in a more traditional way by incorporating `opc($XX),y` 
+     style syntax
+   * **TODO**:
+     - [ ] Implement traditional array declaration/initialization syntax
+
 - [ ] **More Data Types**
   * **The Initial Design Choice**: Limit data types to strings and native 8-bit size variables
-    * **Why Include More Data Types**: Pointers are convenient :point_left:
-    * **Goal**:
-       * Optimize 16-bit arithmetic/comparisons (I realized the expression evaluation limitations I decided
-         to enforce make it easy)
-    * **TODO**:
-      - [ ] Data type declarations
-      - [ ] All the code generation that handles multi-byte operations
+  * **Why Include More Data Types**: Pointers are convenient :point_left:
+  * **Goal**:
+     * Optimize 16-bit arithmetic/comparisons (I realized the expression evaluation limitations I decided
+       to enforce make it easy)
+  * **TODO**:
+    - [ ] Data type declarations
+    - [ ] All the code generation that handles multi-byte operations
 
 - [ ] **Better Configuration Options**
    * **The Design Flaw**: Configuration possibilities were overlooked when it comes to dealing with what
