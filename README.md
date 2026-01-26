@@ -5,6 +5,7 @@ existing assembly codebases
 
 ## Table Of Contents
 
+[//]: # (TODO: I gotta check that all the links are functional lol)
 * [Compatible Targets](#compatible-targets)
 * [Overview](#overview)
    * [Why The Name ***PLASM***?](#why-the-name-plasm)
@@ -18,31 +19,31 @@ existing assembly codebases
   * [MacOS](#macos)
   * [Linux](#linux)
 * [The ***PLASM*** Language](#the-plasm-language)
+   * [Declaration Order](#declaration-order)
    * [Reserved Keywords](#reserved-keywords)[*](#subject-to-change)
-   * [Other Symbols](#other-symbols)[*](#subject-to-change)
-   * [Compiler Directives](#compiler-directives)[*](#subject-to-change)
-   * [Program Structure](#program-structure)
-      * [Comments](#comments)
-      * [Declaring Constants](#declaring-constants)
+      * [Constants](#constants)
       * [Variable/Data Distinction for the `6502` Family Only](#variabledata-distinction-for-the-6502-family-only)
-      * [Declaring Variables](#declaring-variables)
-      * [Declaring Data](#declaring-data)
+      * [Variables](#variables)
+      * [Data](#data)
       * [Declaring Procedures](#declaring-procedures)
-        * [The `main` Procedure](#the-main-procedure)
+         * [The `main` Procedure](#the-main-procedure)
+      * [`mem`](#mem)
+   * [Operators and Symbols](#operators-and-symbols)[*](#subject-to-change)
+      * [Comments](#comments)
       * [Register/Flag Access](#registerflag-access)
          * [`6502` Registers/Flags](#6502-registersflags)
-      * [The `mem` Keyword](#the-mem-keyword)
-      * [Statements and Statement Blocks](#statements-and-statement-blocks)
-         * [`;` in ***PLASM*** vs C](#-in-plasm-vs-c)
-         * [`begin`...`end`](#beginend)
-         * [Assignments](#assignments)
-         * [Assigning Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
-         * [Procedure Calls](#procedure-calls)
-         * [Comparison/Conditional Operators](#comparisonconditional-operators)
-         * [`if`...`then`...`else`](#ifthenelse)
-         * [`repeat`...`until`](#repeatuntil)
-         * [`while`...`do`](#whiledo)
-         * [`asm {`...`} end` (AKA Inline Assembly)](#asm--end-aka-inline-assembly)
+      * [The Semi-Colon (`;`) in ***PLASM*** vs C](#the-semi-colon-in-plasm-vs-c)
+      * [Assignments](#assignments)
+      * [Results Of Arithmetic/Bitwise Logic Operations](#assigning-results-of-arithmeticbitwise-logic-operations)
+      * [Comparison/Conditional Expressions](#comparisonconditional-expressions)
+   * [Compiler Directives](#compiler-directives)[*](#subject-to-change)
+   * [Statement Blocks](#statements-and-statement-blocks)
+      * [Procedure Calls](#procedure-calls)
+      * [`begin`...`end`](#beginend)
+      * [`if`...`then`...`else`](#ifthenelse)
+      * [`repeat`...`until`](#repeatuntil)
+      * [`while`...`do`](#whiledo)
+      * [`asm {`...`} end` (AKA Inline Assembly)](#asm--end-aka-inline-assembly)
 
 ## Compatible Targets
 
@@ -230,8 +231,32 @@ If the pop-up doesn't appear or errors persist, you may need to go into your Mac
 ***Note:*** *Any of the following sections marked with \* are subject to updates as features are added to the
 compiler*
 
+### Declaration Order
+
+***PLASM*** programs have the following structure and declaration order:
+
+```
+Global Constant Declaration Block+
+Global Variable Declaration Block+
+Global Data Declaration Block+
+
+External Constant/Variable/Data/Procedure Declaration Block+
+
+Procedure Declaration+
+Local Constant Declaration Block+
+Local Variable Declaration Block+
+Local Data Declaration Block+
+Procedure Code Block
+
+Main Procedure Code Block*
+```
+
+***Note:*** *Anything with `+` is optional. Anything with `*` is only required if you don't use the `%unit` compiler
+directive at the beginning of the program*
+
 ### Reserved Keywords[*](#subject-to-change)
 
+[//]: # (TODO: Ideally add links to each section at all mentions)
 (Mostly) Self-explanatory list of reserved keywords in ***PLASM***:
 
 * [`const`](#declaring-constants)
@@ -260,89 +285,10 @@ compiler*
 * `in`
 * `ROM`
 
-
-### Other Symbols[*](#subject-to-change)
-
-List of other symbols used in ***PLASM***:
-
-* `.`
-* `$`
-* `#`
-* `@`
-* `{` `}`
-* `[` `]` 
-* `+` 
-* `-` 
-* `|` 
-* `^` 
-* `=` 
-* `<` 
-* `>`
-* `?` 
-* `:` 
-* `;` 
-* `:=`
-* [`6502` Registers/Flags](#6502-registersflags)
-  * [`%A`](#register-flag-a) 
-  * [`%X`](#register-flag-x) 
-  * [`%Y`](#register-flag-y) 
-  * [`%CF`](#register-flag-cf) 
-  * [`%ZF`](#register-flag-zf) 
-  * [`%VF`](#register-flag-vf) 
-  * [`%NF`](#register-flag-nf)
-
-*Some symbols might be different than what you're used to in other languages*
-
-
-### Compiler Directives[*](#subject-to-change)
-
-List of keywords that tell the compiler to behave in different ways:
-
-* `%incbin` 
-* `%incasm` 
-* `%unit`
-
-### Program Structure
-
-***PLASM*** programs have the following structure and declaration order:
-
-```
-Global Constant Declaration Block+
-Global Variable Declaration Block+
-Global Data Declaration Block+
-
-External Constant/Variable/Data/Procedure Declaration Block+
-
-Procedure Declaration+
-Local Constant Declaration Block+
-Local Variable Declaration Block+
-Local Data Declaration Block+
-Procedure Code Block
-
-Main Procedure Code Block*
-```
-
-***Note:*** *Anything with `+` is optional. Anything with `*` is only required if you don't use the `%unit` compiler
-directive at the beginning of the program*
-
-### Comments
-
-Comments in ***PLASM*** begin with `{` and are terminated by `}`:
-
-```
-{ This is a comment }
-{This is another comment}
-
-{ 
-  This is a
-  multi-line
-  comment 
-}
-```
-
-### Declaring Constants
+#### Constants
 
 There are three types of constants:
+
 * Global Constants
 * Local Constants
 * External/`.asm` Constants
@@ -384,19 +330,21 @@ extern const myOtherConst;
 extern const myConst, myOtherConst;
 ```
 
-***Note:*** *The compiler assumes any provided external identifier already exists somewhere. The target assembler 
+***Note:*** *The compiler assumes any provided external identifier already exists somewhere. The target assembler
 is responsible for verifying the constant variable's existence*
 
-### Variable/Data Distinction for the `6502` Family Only
+#### Variable/Data Distinction for the `6502` Family Only
 
 The main reason the difference between variables and data exists in ***PLASM*** is to account for the `Zero Page` when targeting `6502` platforms.
-Data is for anything that doesn't need to take up `Zero Page` space (like `arrays`), while only `Variables` can be pure `pointers` (to take advantage of the `.Y` index
+`data` is for anything that doesn't need to take up `Zero Page` space (like `arrays`), while only `var` can be pure `pointers` (to take advantage of
+the `.Y` index
 register). Therefore an `array` cannot be declared inside a `var` block.
 
-The other rationale is giving the programmer the ability to better seperate what belongs in RAM/ROM for cartridge based systems and making it easy to embed 
-binary/.asm data exported from any of the popular retro gamedev tools inside PLASM.
+The other rationale is giving the programmer the ability to better separate what belongs in `RAM`/`ROM` for cartridge based systems and making it easy
+to embed
+binary/`.asm` data exported from any of the popular retro gamedev tools inside ***PLASM***.
 
-### Declaring Variables
+#### Variables
 
 [//]: # (TODO: Discuss the differences between being able to initialize var/data pointers/arrays with values or not)
 
@@ -420,15 +368,16 @@ extern var v1, v2[];
 
 *A proper typing system with multiple data types is planned for a future version of the compiler. [See it on the Roadmap](#roadmap-types)*
 
-### Declaring Data
+#### Data
 
 [//]: # (TODO: Discuss with Jon the differences between being able to initialize var/data pointers/arrays with values or not)
 
 Data declarations are similar to variable declarations with a key difference regarding arrays.
 
 **Data Declaration:**<br/>
-Pointers/byte values are never initialized with a value and the `array`/`pointer` type is still always indexed starting at 0 with a default size of 1. 
-Arrays can optionally be initialized with the `%incbin` and `%incasm` directives and the syntax for more traditional array initialization is a planned feature for
+Pointers/byte values are never initialized with a value and the `array`/`pointer` type is still always indexed starting at 0 with a default size of 1.
+Arrays can optionally be initialized with the `%incbin` and `%incasm` directives and the syntax for more traditional array initialization is a planned
+feature for
 the Beta version.
 
 ```
@@ -449,7 +398,7 @@ extern data myData, myArray[], array[] in ROM, otherArray[] in ROM;
 
 *A proper typing system with multiple data types is planned for a future version of the compiler. [See it on the Roadmap](#roadmap-types)*
 
-### Declaring Procedures
+#### Declaring Procedures
 
 Equivalent to functions/subroutines in other languages, procedures are blocks of code that can be called from
 other parts of the program
@@ -476,14 +425,15 @@ data localArray[4];
 procedures.* ***However*** *you're free to use local/global variables/data and/or registers to pass arguments
 to the procedure or return as many values as you want*
 
-#### The `main` Procedure
+##### The `main` Procedure
 
-By default ***PLASM*** doesn't assume there will be a `main` procedure in the file it's currently compiling in the sense most programmers are used to. 
+By default ***PLASM*** doesn't assume there will be a `main` procedure in the file it's currently compiling in the sense most programmers are used to.
 
-In a hand written assembly program, the compiler's default assumption is to use the assembly code generated 
+In a hand written assembly program, the compiler's default assumption is to use the assembly code generated
 by the compiler elsewhere. This makes it as easy as possible to integrate ***PLASM*** code
 
-Currently, **there is no mechanism to change the default assumption**. I'm in the process of implementing a compiler directive to address this limitation 
+Currently, **there is no mechanism to change the default assumption**. I'm in the process of implementing a compiler directive to address this
+limitation
 and automate this step. It's the top of my priority list. [See it on the Roadmap](#main-directive)
 
 The syntax for telling the compiler to treat the current `.pl0` file [`begin ... end`](#beginend) block as the `main` procedure:
@@ -493,24 +443,7 @@ The syntax for telling the compiler to treat the current `.pl0` file [`begin ...
 %main(...)   { (...) -> comma seperated list of files to include in the `.asm` output file }
 ```
 
-### Register/Flag Access
-
-***PLASM*** allows access to registers/flags as pseudo-variables inside statements or expressions.
-
-#### `6502` Registers/Flags
-
-* Accumulator (A) Register: `%A`<a name="register-flag-a"></a>
-* X Index (X) Register: `%X` <a name="register-flag-x"></a>
-* Y Index (Y) Register: `%Y` <a name="register-flag-y"></a>
-* Negative (N) Flag: `%NF` <a name="register-flag-nf"></a>
-* Overflow (V) Flag: `%VF` <a name="register-flag-vf"></a>
-* Zero (Z) Flag: `%ZF` <a name="register-flag-zf"></a>
-* Carry (C) Flag: `%CF` <a name="register-flag-cf"></a>
-
-***Note:*** *The compiler only recognizes `6502` registers. As more processors are added to the back
-end, the compiler will recognize registers based on the target CPU*
-
-### The `mem` Keyword
+#### `mem`
 
 ***PLASM*** provides a similar concept to [`BASIC`](https://en.wikipedia.org/wiki/BASIC)'s `PEEK`/`POKE` with the `mem[]` keyword.
 
@@ -518,9 +451,53 @@ end, the compiler will recognize registers based on the target CPU*
 `mem[]` acts as a pseudo variable that allows you to treat memory like a giant `array`.
 This means you can load/store `variables`/`data` from anywhere in memory.
 
-### Statements and Statement Blocks
+### Operator and Symbols[*](#subject-to-change)
 
-Statements in ***PLASM*** are similar to statements in other C-like languages with a few key differences
+[//]: # (TODO: Ideally add links to each section at all mentions)
+List of other symbols used in ***PLASM***:
+
+* `.`
+* `$`
+* `#`
+* `@`
+* `{` `}`
+* `[` `]` 
+* `+` 
+* `-` 
+* `|` 
+* `^` 
+* `=` 
+* `<` 
+* `>`
+* `?` 
+* `:` 
+* `;` 
+* `:=`
+* [`6502` Registers/Flags](#6502-registersflags)
+  * [`%A`](#register-flag-a) 
+  * [`%X`](#register-flag-x) 
+  * [`%Y`](#register-flag-y) 
+  * [`%CF`](#register-flag-cf) 
+  * [`%ZF`](#register-flag-zf) 
+  * [`%VF`](#register-flag-vf) 
+  * [`%NF`](#register-flag-nf)
+
+*Some symbols might be different than what you're used to in other languages*
+
+#### Comments
+
+Comments in ***PLASM*** begin with `{` and are terminated by `}`:
+
+```
+{ This is a comment }
+{This is another comment}
+
+{ 
+  This is a
+  multi-line
+  comment 
+}
+```
 
 #### The Semi-Colon (`;`) in ***PLASM*** vs `C`
 
@@ -528,40 +505,6 @@ In `C`, the semi-colon (`;`) is considered a statement _terminator_.
 
 In ***PLASM***, the semi-color (`;`) is a statement _separator_.
 It's used to tell where one statement ends and another begins.
-
-#### `begin`...`end`
-
-Contrary to other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
-keywords [`begin`...`end`](#beginend) are used
-
-[//]: # (TODO: Jon definitely double check this bc I had copilot auto populate this lol)
-
-```
-{ Single line statement (no begin...end needed) }
-if v1 = v2 then
-  v1 := 1
-else
-  v1 := 0;
-
-{ Multi-line statement (begin...end needed) }
-if v1 = v2 then
-begin
-  v1 := 1;
-  v2 := 2
-end
-else
-begin
-  v1 := 0;
-  v2 := 0
-end;
-
-{ 'main' procedure begin...end block }
-begin
-
-{ Code goes here }
-
-end. { Note that the 'main' procedure block must be terminated by '.' }
-```
 
 #### Assignments
 
@@ -607,9 +550,9 @@ mem[$1000] := v1;     { Uses hard coded value as address }
 %X := %A;
 ```
 
-#### Assigning Results Of Arithmetic/Bitwise Logic Operations
+#### Results Of Arithmetic/Bitwise Logic Operations
 
-***PLASM*** only supports the native bitwise/mathematical operations of the CPU. 
+***PLASM*** only supports the native bitwise/mathematical operations of the CPU.
 For the `6502`, this means only the `addition`, `subtraction`, logical `AND`/`OR`/`EOR`, `shift`/`rotate`,
 `left`/`right`, and `increment`/`decrement` expressions are supported.
 
@@ -658,23 +601,6 @@ inc %Y;
 dec %Y;
 ```
 
-#### Procedure Calls
-
-See [Declaring Procedures](#declaring-procedures) for procedure declaration syntax
-
-```
-{ Allowed }
-
-call SomeProcedure;
-
-{ Not Allowed }
-
-v1 := SomeProcedure;
-v1 := call SomeProcedure;
-```
-
-Any input/output to procedures must be handled manually. It's not possible to assign the result of a procedure call to a `variable`/`data`.
-
 #### Comparison/Conditional Operators
 
 ***PLASM*** supports the following comparison operators:
@@ -697,6 +623,87 @@ v1 > v2
 
 ***Note:*** *Only one comparison or condition operator may be used per conditional statement.*
 ***There is currently no support for combining boolean `AND`/`OR`/`NOT` statements***
+
+#### Register/Flag Access
+
+***PLASM*** allows access to registers/flags as pseudo-variables inside statements or expressions.
+
+##### `6502` Registers/Flags
+
+* Accumulator (A) Register: `%A`<a name="register-flag-a"></a>
+* X Index (X) Register: `%X` <a name="register-flag-x"></a>
+* Y Index (Y) Register: `%Y` <a name="register-flag-y"></a>
+* Negative (N) Flag: `%NF` <a name="register-flag-nf"></a>
+* Overflow (V) Flag: `%VF` <a name="register-flag-vf"></a>
+* Zero (Z) Flag: `%ZF` <a name="register-flag-zf"></a>
+* Carry (C) Flag: `%CF` <a name="register-flag-cf"></a>
+
+***Note:*** *The compiler only recognizes `6502` registers. As more processors are added to the back
+end, the compiler will recognize registers based on the target CPU*
+
+### Compiler Directives[*](#subject-to-change)
+
+[//]: # (TODO: Ideally add links to each section at all mentions)
+List of keywords that tell the compiler to behave in different ways:
+
+* `%incbin` 
+* `%incasm` 
+* `%unit`
+
+### Statement Blocks
+
+Statements in ***PLASM*** are similar to statements in other C-like languages with a few key differences
+
+#### Procedure Calls
+
+See [Declaring Procedures](#declaring-procedures) for procedure declaration syntax
+
+```
+{ Allowed }
+
+call SomeProcedure;
+
+{ Not Allowed }
+
+v1 := SomeProcedure;
+v1 := call SomeProcedure;
+```
+
+Any input/output to procedures must be handled manually. It's not possible to assign the result of a procedure call to a `variable`/`data`.
+
+#### `begin`...`end`
+
+Contrary to other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
+keywords [`begin`...`end`](#beginend) are used
+
+[//]: # (TODO: Jon definitely double check this bc I had copilot auto populate this lol)
+
+```
+{ Single line statement (no begin...end needed) }
+if v1 = v2 then
+  v1 := 1
+else
+  v1 := 0;
+
+{ Multi-line statement (begin...end needed) }
+if v1 = v2 then
+begin
+  v1 := 1;
+  v2 := 2
+end
+else
+begin
+  v1 := 0;
+  v2 := 0
+end;
+
+{ 'main' procedure begin...end block }
+begin
+
+{ Code goes here }
+
+end. { Note that the 'main' procedure block must be terminated by '.' }
+```
 
 #### `if`...`then`...`else`
 
