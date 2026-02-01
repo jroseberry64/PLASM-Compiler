@@ -1,19 +1,36 @@
-var CurrLine;
+%main(X16Kernal_IO.pl0,X16_VERA.pl0,String.pl0,main.asm) 
+
+var 
+	CurrLine: u8;
+
+data
+	Str[] = "press f12 and type: 'v 0138a5' to see byte $55 in 16 byte incr (emu only)",
+	Str3[] =  "cmpstrnt passed",
+	Str4[] = "lenstrnt passed",
+	Str5[] = "clearmem passed",
+	Str6[] = "fillmem passed",
+
+	Str2[] = "please press enter to continue test...",
+	ErrStr[] = "*womp womp*...test case failed...",
+
+	CmpStr1[] = "string",
+	CmpStr2[] = "string",
+	CmpStr3[] = "strng";
 
 { X16Kernal_IO.pl0 }
 extern procedure WriteLn, K_CHRIN, K_CHROUT, ClrScr, SetScrCurXY;
-extern var WriteLnPtr[];
-extern data ReadLnBuffer[], Str[], Str2[];
+extern var WriteLnPtr[]: char;
+extern data ReadLnBuffer[]: char;
 
 { X16_VERA.pl0 }
 extern procedure VERA_SetAddrAndIncr;
-extern data V_ADDR_L, V_ADDR_M, V_ADDR_H, V_port, V_addr_incr, V_incr_dir;
+extern data V_ADDR_L: u8, V_ADDR_M: u8, V_ADDR_H: u8, V_port: u8, V_addr_incr: u8, V_incr_dir: u8;
 extern const VERA_ADDR_S_16, VERA_DATP0, VERA_ADDR_DR_FW, VERA_DATA0;
 
 { String.pl0 }
 extern procedure SetMem, ClearMem, CmpStrNT, LenStrNT;
-extern var StrPtr1[], StrPtr2[];
-extern data CmpStr1[], CmpStr2[], CmpStr3[], Str3[], Str4[], Str5[], Str6[], ErrStr[], DataBuff[];
+extern var StrPtr1[]: char, StrPtr2[]: char;
+extern data DataBuff[];
 
 { HELPER PROCEDURES }
 
