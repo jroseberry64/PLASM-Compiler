@@ -231,7 +231,7 @@ begin
     while %X # 0 do 
     begin 
         %A := DataPtr[%Y];
-        mem[VERA_DATP0] := %A;
+        mem[VERA_DATA0] := %A;
         inc %Y;
         dec %X;
     end
