@@ -838,6 +838,24 @@ v1 := call SomeProcedure;
 
 Any input/output to procedures must be handled manually. It's not possible to assign the result of a procedure call to a `variable`/`data`.
 
+**Using `goto` For Procedure Tail Call**
+
+[//]: # (TODO: add link (https://www.nesdev.org/wiki/6502_assembly_optimisations#Avoid_a_jsr_+_rts_chain))
+
+It's possible to substitute `goto` for `call` to tell the compiler you want to perform a tail call. This also
+helps the compiler optimize the program size by omitting `rts` or `bxx`/`jmp` assembly instructions when applicable.
+
+```
+{ The following is an example of where the compiler can omit an `rts` instruction }
+
+procedure MyProc;
+var v1, v2;
+begin
+  if v1 = v2 then
+    goto SomeProcedure
+end;
+```
+
 #### `begin`...`end`
 
 Contrary to other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
@@ -923,6 +941,56 @@ end;
 ```
 
 See also [`begin`...`end`](#beginend)
+
+#### `break`
+
+Works the same as `break` in C or any other C-like language.
+
+**`break` Examples:**
+
+```
+%X := 0;
+while %X < 5 do
+begin
+  if a1[%X] = 0 then
+    break
+  else
+    inc %X
+end;
+
+%Y := 0;
+repeat
+  if p[%Y] = $FF then
+    break
+  else
+    inc %Y
+until %Y = 20;
+```
+
+#### `exit`
+
+Works the same as `return` in C or any other C-like language to exit a procedure early.
+
+**`exit` Examples:**
+
+```
+%X := 0;
+while %X < 5 do
+begin
+  if a1[%X] = 0 then
+    exit
+  else
+    inc %X
+end;
+
+%Y := 0;
+repeat
+  if p[%Y] = $FF then
+    exit
+  else
+    inc %Y
+until %Y = 20;
+```
 
 #### `asm {`...`} end` (AKA Inline Assembly)
 
