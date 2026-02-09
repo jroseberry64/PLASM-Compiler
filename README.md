@@ -84,7 +84,8 @@ typically found in a modern language providing **more control** in order to make
 
 The idea is to provide *just enough* of a language that it's **faster** and **less error prone** than writing
 pure assembly code, but with the capability of **freely inlining assembly anywhere** to achieve anything the
-language doesn't provide out of the box, enabling more **developer autonomy and control**.
+language doesn't provide out of the box, enabling more **developer autonomy and control** (along with more
+responsibilities).
 
 In fact, it's very possible to use ***PLASM*** as a thin wrapper around assembly code while only using the
 compiler to help with organizing `variables`/`data`/`subroutines`. Bear in mind that while this is *technically* 
@@ -583,32 +584,75 @@ The `:=` symbol acts as the assignment operator for ***PLASM***.
 **Valid Assignments:**
 
 ```
-{ Variable assignment }
+{ Variable assignment (unsigned byte) }
 
-v1 := 1;         { Assign a constant value }
+v1 := 1;               { Assign a constant value }
 v1 := HexConst;
 v1 := NumConst;
+v1 := MyEnum::Mem1;    { Assign an enum value }
 
 v1 := v2;        { Assign the value of one variable to another }
 v1 := mem[$10];  { Assign the value of a memory location }
 v1 := p1[];      { Assign dereferenced pointer value }
 v1 := p1[%Y];    { Offsets p1 by the contents of the Y register and assigns value of dereferenced pointer }
 v1 := a1[0];     { Assigns the value of the first element in array }
+v1 := a1[];      { Implicitly assigns the value of the first element in array }
+v1 := a1[i];     { Assigns the value of element in array indexed by variable `i` }
+
+
+{ Variable assignment (unsigned word) }
+
+v1 := 1;         { Assign a constant value }
+v1 := 256;
+v1 := Hex8Const;
+v1 := Hex16Const;
+v1 := NumConst;
+
+v1 := v2;        { Assign the value of unsigned word variable to unsigned word variable }
+v1 := p1[];      { Assign dereferenced unsigned word pointer value  }
+v1 := a1[0];     { Assigns the value of the first element in unsigned word array }
+v1 := a1[];      { Implicitly assigns the value of the first element in unsigned word array }
+v1 := a1[i];     { Assigns the value of element in unsigned word array indexed by variable `i` }
+
    
-{ Pointer assignment (Same as variable with these additions) }
-p1[] := v1;      { Assigns variable to dereferenced pointer }
-p1 := @v1;       { Assign address of variable to pointer }
-p1 := AddrConst; { Same as above but with constant }
+{ Pointer assignment (Same as unsigned byte variable with these additions) }
 
-{ Array assignment (Same as variable with these additions) }
-a1[] := v1;      { First element of array assigned variable value }
-a1[%X] := v1;    { Array element index by %X assigned variable value }
+p1[] := v1;                { Assigns unsigned byte variable to dereferenced unsigned byte pointer }
+p1[] := MyEnum::Mem1;      { Assigns enum value to dereferenced unsigned byte pointer }
+p1 := @v1;                 { Assign address of unsigned byte variable to unsigned byte pointer }
+p1 := AddrConst;           { Same as above but with constant }
 
-{ Memory assignment (same as variable, with two variations) }
-mem[AddrConst] := 1;  { Uses cont as address }
-mem[$1000] := v1;     { Uses hard coded value as address }
 
-{ Register Assignment }
+{ Pointer assignment (Same as unsigned word variable with these additions) }
+
+p1[] := v1;       { Assigns unsigned word variable to dereferenced unsigned word pointer }
+p1 := @v1;        { Assign address of unsigned word variable to unsigned word pointer }
+p1 := AddrConst;  { Same as above but with constant }
+
+
+{ Array assignment (Same as unsigned byte variable with these additions) }
+
+a1[] := v1;      { First element of unsigned byte array assigned unsigned byte variable value }
+a1[%X] := v1;    { Array element of type unsigned byte indexed by %X assigned unsigned byte variable value }
+a1[i] := v1;     { Array element of type unsigned byte indexed by unsigned byte variable `i` assigned unsigned byte variable value }
+
+
+{ Array assignment (Same as unsigned word variable with these additions) }
+
+a1[] := v1;      { First element of unsigned word array assigned unsigned word variable value }
+a1[i] := v1;     { Array element of type unsigned word indexed by unsigned byte variable `i` assigned unsigned word variable value }
+
+
+{ Memory assignment (same as unsigned byte variable, with two variations) }
+
+{ NOTE: ONLY u8/char/enum VALUES ARE ASSIGNABLE }
+mem[AddrConst] := 1;            { Uses cont as address }
+mem[$1000] := v1;               { Uses hard coded value as address }
+mem[$1000] := MyEnum::Mem1;     { Uses hard coded value as address }
+
+
+{ Register Assignment (unsigned byte only) }
+
 %A := 1;
 %A := v1;
 %A := p1[];
@@ -618,6 +662,13 @@ mem[$1000] := v1;     { Uses hard coded value as address }
 %X := 1;
 %X := p1[%Y];
 %X := %A;
+
+
+{ Setting Carry Flag }
+
+%CF := 1;
+%CF := 0;
+
 ```
 
 #### Results Of Arithmetic/Bitwise Logic Operations
