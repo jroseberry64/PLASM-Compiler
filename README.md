@@ -106,33 +106,33 @@ out with, but is a few features short of desired production ready functionality.
 
 The **Roadmap to the Beta Version** includes:
 
-- [ ] **Main File Compiler Directive**<a name="main-directive"></a>
+- [X] **Main File Compiler Directive**<a name="main-directive"></a>
    * **The Design Flaw**: Currently, there's no way to tell the compiler to treat a `.pl0` file as the `main`
      program file without manually including other files
    * **Goal**: Allow users to write a complete program in a single `.pl0` file without needing to manually
      include other `.asm` files
    * **TODO**:
-     - [ ] Implement the `%main` compiler directive
+     - [X] Implement the `%main` compiler directive
 
 [//]: # (TODO: Jon, double check this section for accuracy lol)
-- [ ] **Traditional Array Syntax**<a name="traditional-array-syntax"></a>
+- [X] **Traditional Array Syntax**<a name="traditional-array-syntax"></a>
    * **The Design Flaw**: `X`/`Y` index registers are only supported for pointer/array dereferencing
      inside expressions/statements. There's no way to declare an array with a specific size and initialize
      it with values like in other languages
    * **Goal**: Allow users to declare/initialize arrays in a more traditional way by incorporating `opc($XX),y` 
      style syntax
    * **TODO**:
-     - [ ] Implement traditional array declaration/initialization syntax
+     - [X] Implement traditional array declaration/initialization syntax
 
-- [ ] **More Data Types**
+- [X] **More Data Types**
   * **The Initial Design Choice**: Limit data types to strings and native 8-bit size variables
   * **Why Include More Data Types**: Pointers are convenient :point_left:
   * **Goal**:
      * Optimize 16-bit arithmetic/comparisons (I realized the expression evaluation limitations I decided
        to enforce make it easy)
   * **TODO**:
-    - [ ] Data type declarations
-    - [ ] All the code generation that handles multi-byte operations
+    - [X] Data type declarations
+    - [X] All the code generation that handles multi-byte operations
 
 - [ ] **Better Configuration Options**
    * **The Design Flaw**: Configuration possibilities were overlooked when it comes to dealing with what
@@ -236,6 +236,10 @@ compiler*
 ***PLASM*** programs have the following structure and declaration order:
 
 ```
+%main() Declaration+
+
+Enum Declaration Block+
+
 Global Constant Declaration Block+
 Global Variable Declaration Block+
 Global Data Declaration Block+
@@ -262,6 +266,7 @@ directive at the beginning of the program*
 * [`const`](#declaring-constants)
 * [`var`](#declaring-variables)
 * [`data`](#declaring-data)
+* `enum`
 * `call`
 * [`procedure`](#declaring-procedures)
 * [`begin`](#beginend)
@@ -279,11 +284,22 @@ directive at the beginning of the program*
 * `ror`
 * `shl`
 * `shr`
+* `add16`
+* `sub16`
+* `cmp16`
+* `and16`
+* `or16`
+* `eor16`
 * [`mem`](#the-mem-keyword)
 * `asm`
 * `extern`
 * `in`
 * `ROM`
+* `break`
+* `exit`
+* `u8`
+* `u16`
+* `char`
 
 #### Constants
 
@@ -353,17 +369,28 @@ Variables are never initialized with a value. The `array`/`pointer` type is alwa
 
 ```
 { Variable Types }
-var byteVar;  { Declares a variable with the default type of unsigned byte }
-var ptrVar[]; { Declares a pointer to any type }
+var byteVar;        { Declares a variable with implicit default type of unsigned byte }
+var byteVar: u8;    { Declares a variable with explicit type of unsigned byte }
+var byteVar: u16;   { Declares a variable with explicit type of unsigned word }
+var byteVar: char;  { Declares a variable with explicit type of unsigned char (byte) }
+var ptrVar[];       { Declares a pointer to any 8-bit type }
+var ptrVar[]: u8;   { Declares a pointer to explicit type of unsigned byte }
+var ptrVar[]: u16;  { Declares a pointer to explicit type of unsigned word }
+var ptrVar[]: char; { Declares a pointer to explicit type of unsigned char (or string) }
 
 { Declaring Multiple Variables }
 var
   var1,
+  var2: u8,
+  var3: u16,
+  var4: char,
   ptrV1[],
-  var2;
+  ptrV2[]: u8,
+  ptrV3[]: u16,
+  ptrV4: char;
 
 { Declaring External Variables }
-extern var v1, v2[];
+extern var v1, v2[], v3: u8, v4: u16, v5:char, v6[]: u8, v7[]: u16, v8[]: char;
 ```
 
 *A proper typing system with multiple data types is planned for a future version of the compiler. [See it on the Roadmap](#roadmap-types)*
@@ -375,15 +402,25 @@ extern var v1, v2[];
 Data declarations are similar to variable declarations with a key difference regarding arrays.
 
 **Data Declaration:**<br/>
-Pointers/byte values are never initialized with a value and the `array`/`pointer` type is still always indexed starting at 0 with a default size of 1.
-Arrays can optionally be initialized with the `%incbin` and `%incasm` directives and the syntax for more traditional array initialization is a planned
-feature for
+Pointers/byte values are never initialized with a value and the `array`/`pointer` type is still always indexed starting at 0 with a default size of 1 for byte values and 2 for word values.
+Arrays can optionally be initialized with the `%incbin` and `%incasm` directives and the syntax for more traditional array initialization for
+non-strings is a planned feature for
 the Beta version.
 
 ```
-{ Declaring an Array }
-data myArray[];    { Default size: 1 }
-data myArray[10];  { Size: 10 }
+{ Declaring an Array (size in bytes) }
+data myArray[];                     { Default size: 1, Default type: unsigned byte }
+data myArray[10];                   { Size: 10,  Default type: unsigned byte }
+
+data myArray[]: u8;                 { Default size: 1, Declared Type: unsigned byte }
+data myArray[10]: u8;               { Size: 10,  Declared Type: unsigned byte }
+
+data myArray[]: u16;                { Default size: 2, Declared Type: unsigned word }
+data myArray[10]: u16;              { Size: 20,  Declared Type: unsigned byte }
+
+data myArray[]: char;               { Default size: 1, Declared Type: unsigned char }
+data myArray[10]: char;             { Size: 10,  Declared Type: unsigned char }
+data myArray[]: char = "String";    { Default size: 7 (6 char bytes + '\0'), Declared Type: unsigned char string }
 
 { Initialize with `.asm`/`.bin` data }
 data
@@ -397,6 +434,38 @@ extern data myData, myArray[], array[] in ROM, otherArray[] in ROM;
 ```
 
 *A proper typing system with multiple data types is planned for a future version of the compiler. [See it on the Roadmap](#roadmap-types)*
+
+#### Enum
+
+Equivelant to enumerated values in other languages, but are declared at the global level only and are limited to unsigned byte values
+
+**Enum Declaration**
+
+By default, members of an `enum` start at 0 and count up, but this value can be explicitely modified at any point in the
+declaration as shown below.
+
+```
+{ Declaring an Enum }
+enum MyEnum:
+  val1,          { Implicitly starts at 0 and counts up }
+  val2,
+  val3;
+
+{ Declaring an Enum with explicit start value }
+enum StartDefEnum:
+  val1 = 3,      { Explicitly starts at 3 and counts up }
+  val2,
+  val3;
+
+{ Declaring an Enum with explicit next value }
+enum NextValEnum:
+  val1,          { Implicitly starts at 0 and counts up }
+  val2,
+  val3 = 4,      { Explicitly sets value to 4 }
+  val4,          { val4 = 5 }
+  val5 = 10;     { Explicitly sets value to 10 }
+
+```
 
 #### Declaring Procedures
 
@@ -471,7 +540,8 @@ List of other symbols used in ***PLASM***:
 * `>`
 * `?` 
 * `:` 
-* `;` 
+* `;`
+* `::` 
 * `:=`
 * [`6502` Registers/Flags](#6502-registersflags)
   * [`%A`](#register-flag-a) 
@@ -649,6 +719,7 @@ List of keywords that tell the compiler to behave in different ways:
 * `%incbin` 
 * `%incasm` 
 * `%unit`
+* `%main()`
 
 ### Statement Blocks
 
