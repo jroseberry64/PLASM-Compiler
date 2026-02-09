@@ -423,7 +423,7 @@ data myArray[]: char;               { Default size: 1, Declared Type: unsigned c
 data myArray[10]: char;             { Size: 10,  Declared Type: unsigned char }
 data myArray[]: char = "String";    { Default size: 7 (6 char bytes + '\0'), Declared Type: unsigned char string }
 
-{ Initialize with `.asm`/`.bin` data }
+{ Initialize with `.asm`/`.bin` data (typing is optional for maximum access control) }
 data
   myArray[] = %incbin:SomeBinFile.bin,
   array2[] = %incasm:SomeAsmData.asm,
@@ -440,7 +440,7 @@ extern data myData, myArray[], array[] in ROM, otherArray[] in ROM;
 
 Equivelant to enumerated values in other languages, but are declared at the global level only and are limited to unsigned byte values
 
-**Enum Declaration**
+**Enum Declaration:**
 
 By default, members of an `enum` start at 0 and count up, but this value can be explicitely modified at any point in the
 declaration as shown below.
@@ -519,7 +519,7 @@ The syntax for telling the compiler to treat the current `.pl0` file [`begin ...
 
 [//]: # (TODO: I don't have time right now, but add links to the variable and data sections at all mentions)
 `mem[]` acts as a pseudo variable that allows you to treat memory like a giant `array`.
-This means you can load/store `variables`/`data` from anywhere in memory.
+This means you can load/store ***unsigned byte*** `variables`/`data` from anywhere in memory.
 
 ### Operator and Symbols[*](#subject-to-change)
 
@@ -668,13 +668,14 @@ mem[$1000] := MyEnum::Mem1;     { Uses hard coded value as address }
 
 %CF := 1;
 %CF := 0;
-
 ```
 
 #### Results Of Arithmetic/Bitwise Logic Operations
 
+**Unsigned Byte/Char/Enum Values**
+
 ***PLASM*** only supports the native bitwise/mathematical operations of the CPU.
-For the `6502`, this means only the `addition`, `subtraction`, logical `AND`/`OR`/`EOR`, `shift`/`rotate`,
+For the `6502`, this means only the `addition`, `subtraction`, logical `AND`/`OR`/`EOR`, `shift`/`rotate`
 `left`/`right`, and `increment`/`decrement` expressions are supported.
 
 The `addition`, `subtraction`, and logical `AND`/`OR`/`EOR` are strictly **binary operations**
@@ -701,7 +702,7 @@ v1 := v2 & v3 + v4;
 &ensp;`shift`/`rotate`, `left`/`right`, `increment`/`decrement`
 
 ```
-{ This is how to use the unary operators }
+{ This is how to use the unary operators for unsigned byte values }
 inc v1;
 dec v1;
 shl v1;
@@ -722,11 +723,55 @@ inc %Y;
 dec %Y;
 ```
 
-#### Comparison/Conditional Operators
+**Unsigned Word Values**
 
-***PLASM*** supports the following comparison operators:
+***PLASM*** has limited support for arithmetic/logical bitwise expressions for unsigned word values.
+There's no difference between using the `shift`/`rotate` `left`/`right` and `increment`/`decrement` 
+operators with unsigned word values and unsigned byte values. 
+
+Unsigned word bitwise `and`/`or`/`not`, comparison, and addition/subtraction is implemented with several keywords
+with limitations to the operands you can choose.
+
+A full combination of valid operands is demonstrated in `test2.pl0`
+
+**`add16`/`sub16`:**
 
 ```
+{ Note that the operation performed is equivelant to: v1 := v1 (+/-) v2 }
+add16 v1 v2;
+sub16 v1 v2;
+
+```
+
+**`and16`/`or16`/`eor16`:**
+
+```
+{ Note that the operation performed is equivelant to: v1 := v1 (&/|/^) v2 }
+and16 v1 v2;
+or16 v1 v2;
+eor16 v1 v2;
+```
+
+**`cmp16`:**
+
+```
+{ Note that the CPU flags are set as if a byte comparison was just made }
+cmp16 v1 v2;
+
+{ Example usage of flag result }
+if %ZF+ then
+  { Handle v1 = v2 }
+else
+  { Handle v1 # v2 }
+
+```
+
+#### Comparison/Conditional Operators
+
+***PLASM*** supports the following ***unsigned byte*** comparison operators:
+
+```
+{ unsigned byte/char/enum values }
 v1 = v2  { Tests equality }
 v1 # v2  { Tests inequality }
 v1 < v2  { <=, >= will be added to Beta }
@@ -734,12 +779,12 @@ v1 > v2
 
 %CF-     { Carry Flag Clear }
 %CF+     { Carry Flag Set }
-%VF-
-%VF+
-%ZF-
-%ZF+
-%NF-
-%NF+
+%VF-     { Overflow Flag Clear }
+%VF+     { Overflow Flag Set }
+%ZF-     { Zero Flag Clear }
+%ZF+     { Zero Flag Set }
+%NF-     { Negative Flag Clear }
+%NF+     { Negative Flag Set }
 ```
 
 ***Note:*** *Only one comparison or condition operator may be used per conditional statement.*
