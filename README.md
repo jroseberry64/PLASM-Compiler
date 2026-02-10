@@ -416,8 +416,6 @@ data
 extern data myData, myArray[], array[] in ROM, otherArray[] in ROM; 
 ```
 
-*A proper typing system with multiple data types is planned for a future version of the compiler. [See it on the Roadmap](#roadmap-types)*
-
 #### Enum
 
 Equivelant to enumerated values in other languages, but are declared at the global level only and are limited to unsigned byte values
