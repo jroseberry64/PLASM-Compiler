@@ -115,7 +115,6 @@ The **Roadmap to the Beta Version** includes:
    * **TODO**:
      - [X] Implement the `%main` compiler directive
 
-[//]: # (TODO: Jon, double check this section for accuracy lol)
 - [X] **Traditional Array Syntax**<a name="traditional-array-syntax"></a>
    * **The Design Flaw**: `X`/`Y` index registers are only supported for pointer/array dereferencing
      inside expressions/statements. There's no way to declare an array with a specific size and initialize
@@ -127,7 +126,7 @@ The **Roadmap to the Beta Version** includes:
 
 - [X] **More Data Types**
   * **The Initial Design Choice**: Limit data types to strings and native 8-bit size variables
-  * **Why Include More Data Types**: Pointers are convenient :point_left:
+  * **Why Include More Data Types**: Pointers with automatic pointer arithmetic are convenient :point_left:
   * **Goal**:
      * Optimize 16-bit arithmetic/comparisons (I realized the expression evaluation limitations I decided
        to enforce make it easy)
@@ -135,26 +134,13 @@ The **Roadmap to the Beta Version** includes:
     - [X] Data type declarations
     - [X] All the code generation that handles multi-byte operations
 
-- [ ] **Better Configuration Options**
-   * **The Design Flaw**: Configuration possibilities were overlooked when it comes to dealing with what
-     character
-     set the target machine uses (`ASCII` vs `PETSCII`)
-   * **The Workaround**: I (temporarily) removed native `string`/`char` support pending command line
-     options/inline compiler
-     directives to deal with this. You are still capable of declaring strings in an assembly file and there's
-     a mechanism
-     to tell the compiler that's what you're doing, but this workaround is only temporary
-   * **Current Default Behavior**: Assume the user will provide their own assembly file to act as the `main`
-     program file
-   * **Goal**: Add more boilerplate to the `.asm` file
-   * **TODO**:
-     - [ ] Add a feature to tell the compiler which file to use as the `main` file
-
 - [ ] **Miscellaneous Features**
   - [ ] Add a few more keywords, features, and backend optimization passes to the IR
   - [ ] A dash of syntactic sugar to make writing some expressions shorter
+  - [ ] Specify string encoding
+  - [ ] Specify data segments for cartridge based targets
   - [ ] Support for more assembler back ends. Currently, only `CA65`/`CL65` assembly format is supported.
-  - [ ] A proper typing system with type checking <a name="roadmap-types"></a>
+  - [X] A proper typing system with type checking <a name="roadmap-types"></a>
   - [ ] Uploading the source code. I'd prefer to do some more refactoring/cleanup before sharing the `C` source.
   - [ ] Better compiler error messages
   - [ ] More library code. Currently, only `Commander X16` examples are provided with a minimal amount of tested
@@ -359,7 +345,7 @@ register). Therefore an `array` cannot be declared inside a `var` block.
 
 The other rationale is giving the programmer the ability to better separate what belongs in `RAM`/`ROM` for cartridge based systems and making it easy
 to embed
-binary/`.asm` data exported from any of the popular retro gamedev tools inside ***PLASM***.
+binary/`.asm` data exported from any of the popular retro gamedev tools inside ***PLASM*** code.
 
 #### Variables
 
@@ -394,11 +380,7 @@ var
 extern var v1, v2[], v3: u8, v4: u16, v5:char, v6[]: u8, v7[]: u16, v8[]: char;
 ```
 
-*A proper typing system with multiple data types is planned for a future version of the compiler. [See it on the Roadmap](#roadmap-types)*
-
 #### Data
-
-[//]: # (TODO: Discuss with Jon the differences between being able to initialize var/data pointers/arrays with values or not)
 
 Data declarations are similar to variable declarations with a key difference regarding arrays.
 
@@ -500,13 +482,10 @@ to the procedure or return as many values as you want*
 By default ***PLASM*** doesn't assume there will be a `main` procedure in the file it's currently compiling in the sense most programmers are used to.
 
 In a hand written assembly program, the compiler's default assumption is to use the assembly code generated
-by the compiler elsewhere. This makes it as easy as possible to integrate ***PLASM*** code
+by the compiler elsewhere. This makes it as easy as possible to integrate ***PLASM*** code with any current projects.
 
-Currently, **there is no mechanism to change the default assumption**. I'm in the process of implementing a compiler directive to address this
-limitation
-and automate this step. It's the top of my priority list. [See it on the Roadmap](#main-directive)
-
-The syntax for telling the compiler to treat the current `.pl0` file [`begin ... end`](#beginend) block as the `main` procedure:
+If that's not the desired use case then syntax for telling the compiler to treat the current 
+`.pl0` file [`begin ... end`](#beginend) block as the `main` procedure is:
 
 ```
 { Directive }
@@ -553,7 +532,7 @@ List of other symbols used in ***PLASM***:
   * [`%VF`](#register-flag-vf) 
   * [`%NF`](#register-flag-nf)
 
-*Some symbols might be different than what you're used to in other languages*
+*Some symbols might be used different than what you're used to in other languages*
 
 #### Comments
 
@@ -840,10 +819,10 @@ Any input/output to procedures must be handled manually. It's not possible to as
 
 **Using `goto` For Procedure Tail Call**
 
-[//]: # (TODO: add link (https://www.nesdev.org/wiki/6502_assembly_optimisations#Avoid_a_jsr_+_rts_chain))
-
-It's possible to substitute `goto` for `call` to tell the compiler you want to perform a tail call. This also
-helps the compiler optimize the program size by omitting `rts` or `bxx`/`jmp` assembly instructions when applicable.
+It's possible to substitute `goto` for `call` to tell the compiler you want to perform a 
+[tail call](https://www.nesdev.org/wiki/6502_assembly_optimisations#Avoid_a_jsr_+_rts_chain). 
+This also helps the compiler optimize the program size by omitting `rts` or `bxx`/`jmp` assembly instructions 
+when applicable.
 
 ```
 { The following is an example of where the compiler can omit an `rts` instruction }
@@ -860,8 +839,6 @@ end;
 
 Contrary to other C-like languages, ***PLASM*** doesn't utilize `{...}` to organize blocks of code. Instead, the
 keywords [`begin`...`end`](#beginend) are used
-
-[//]: # (TODO: Jon definitely double check this bc I had copilot auto populate this lol)
 
 ```
 { Single line statement (no begin...end needed) }
